@@ -1,9 +1,42 @@
 #tag Class
 Protected Class MarkdownWriter
 	#tag Method, Flags = &h0
+		Function GetParent(root As FolderItem, f As XdocFile) As FolderItem
+		  Dim filename As String = f.Name + ".md"
+		  
+		  If f.ParentId = "" Or f.ParentId = "&h0" Then
+		    Return root.Child(filename)
+		  End If
+		  
+		  Dim current As XdocFolder = Project.Folders.Value(f.ParentId)
+		  Dim parents() As XdocFolder
+		  
+		  Do
+		    parents.Append current
+		    current = Project.Folders.Lookup(current.ParentId, Nil)
+		  Loop Until current Is Nil
+		  
+		  Dim fh As FolderItem = root
+		  
+		  For i As Integer = parents.Ubound DownTo 0
+		    fh = fh.Child(parents(i).Name)
+		    
+		    If Not fh.Exists Then
+		      fh.CreateAsFolder
+		    End If
+		  Next
+		  
+		  Return fh.Child(filename)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Write(path As FolderItem, project As XdocProject)
+		  Self.Project = project
+		  
 		  For Each f As XdocFile In project.Files
-		    Dim fh As FolderItem = path.Child(f.Name + ".md")
+		    Dim fh As FolderItem = GetParent(path, f)
 		    Dim tos As TextOutputStream = TextOutputStream.Create(fh)
 		    
 		    tos.WriteLine "# " + f.Type + " " +  f.Name
@@ -41,9 +74,25 @@ Protected Class MarkdownWriter
 		      Next
 		    End If
 		    
-		    If False Then
-		      tos.WriteLine "## Event Definitions"
-		      tos.WriteLine ""
+		    If f.EventDefinitions.Ubound > -1 Then
+		      Dim lines() As String
+		      
+		      For Each m As XdocMethod In f.EventDefinitions
+		        Dim line As String = m.Name + "(" + Join(m.Parameters, ", ") + ")"
+		        If m.ReturnType <> "" Then
+		          line = line + " As " + m.ReturnType
+		        End If
+		        
+		        lines.Append "### `" + line + "`"
+		        lines.Append m.Notes
+		        lines.Append ""
+		      Next
+		      
+		      If lines.Ubound > -1 Then
+		        tos.WriteLine "## Event Definitions"
+		        tos.WriteLine ""
+		        tos.WriteLine Join(lines, EndOfLine)
+		      End If
 		    End If
 		    
 		    If IncludeEvents And f.Events.Ubound > -1 Then
@@ -144,6 +193,10 @@ Protected Class MarkdownWriter
 
 	#tag Property, Flags = &h0
 		IncludeProtected As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Project As XdocProject
 	#tag EndProperty
 
 

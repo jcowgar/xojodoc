@@ -60,10 +60,22 @@ Inherits ConsoleApplication
 	#tag EndMethod
 
 
+	#tag Hook, Flags = &h0
+		Event Abc()
+	#tag EndHook
+
+	#tag Hook, Flags = &h0
+		Event AbcXyz(name As String)
+	#tag EndHook
+
+	#tag Hook, Flags = &h0
+		Event Xyz123() As String
+	#tag EndHook
+
+
 	#tag Note, Name = TODO
-		* Write to the same directory structure the files were parsed from
+		
 		* Parse and Write Constants
-		* Parse and Write Event Definitions
 	#tag EndNote
 
 

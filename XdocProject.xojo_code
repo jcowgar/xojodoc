@@ -3,11 +3,18 @@ Protected Class XdocProject
 	#tag Method, Flags = &h0
 		Sub Constructor(file As FolderItem)
 		  Self.File = file
+		  Self.Folders = New Dictionary
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub ReadManifest()
+		  Const kName = 0
+		  Const kPath = 1
+		  Const kId = 2
+		  Const kParentId = 3
+		  Const kUnknown = 4
+		  
 		  Dim tis As TextInputStream = TextInputStream.Open(File)
 		  
 		  While Not tis.EOF
@@ -34,8 +41,32 @@ Protected Class XdocProject
 		    
 		    Select Case partType
 		    Case "Class", "Interface", "Module"
-		      Dim fh As FolderItem = GetRelativeFolderItem(values(1), File.Parent)
-		      Files.Append New XdocFile(values(0), fh)
+		      If values(1).Right(10) = ".xojo_code" Then
+		        Dim fh As FolderItem = GetRelativeFolderItem(values(1), File.Parent)
+		        
+		        Dim f As New XdocFile(values(0), fh)
+		        f.Id = values(2)
+		        f.ParentId = values(3)
+		        
+		        Files.Append f
+		      End If
+		      
+		      If partType = "Module" Then
+		        Dim f As New XdocFolder
+		        f.Name = values(kName)
+		        f.Id = values(kId)
+		        f.ParentId = values(kParentId)
+		        
+		        Folders.Value(f.Id) = f
+		      End If
+		      
+		    Case "Folder"
+		      Dim f As New XdocFolder
+		      f.Name = values(0)
+		      f.Id = values(2)
+		      f.ParentId = values(3)
+		      
+		      Folders.Value(f.Id) = f
 		      
 		    Case Else
 		      // We are not interested in anything else
@@ -62,6 +93,10 @@ Protected Class XdocProject
 
 	#tag Property, Flags = &h0
 		Files() As XdocFile
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Folders As Dictionary
 	#tag EndProperty
 
 

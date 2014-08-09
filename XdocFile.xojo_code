@@ -13,7 +13,7 @@ Protected Class XdocFile
 		  
 		  If rx Is Nil Then
 		    rx = New RegEx
-		    rx.SearchPattern = "(?mi-Us)(Private|Protected|Public|Global)*\s(Function|Sub)\s([a-z0-9_]+)\((.*)\)(\sAs\s(.*))*"
+		    rx.SearchPattern = "(?mi-Us)(Private|Protected|Public|Global)*\s(Event|Function|Sub)\s([a-z0-9_]+)\((.*)\)(\sAs\s(.*))*"
 		    
 		    dim rxOptions As RegExOptions = rx.Options
 		    rxOptions.LineEndType = 4
@@ -29,7 +29,7 @@ Protected Class XdocFile
 		  
 		  If rx Is Nil Then
 		    rx = New RegEx
-		    rx.SearchPattern = "(?mi-Us)^((Private|Protected|Public|Global)\s)?([a-z0-9_\(\)]+)\sAs\s(.*)$"
+		    rx.SearchPattern = "(?mi-Us)^((Private|Protected|Public|Global)\s)?((Shared)\s)?([a-z0-9_\-\(\),]+)\sAs\s(.*)$"
 		    
 		    dim rxOptions As RegExOptions = rx.Options
 		    rxOptions.LineEndType = 4
@@ -81,6 +81,9 @@ Protected Class XdocFile
 		        
 		      Case "Note"
 		        Notes.Append ParseNote(tis, match.SubExpressionString(3))
+		        
+		      Case "Hook"
+		        EventDefinitions.Append ParseMethod(tis)
 		      End Select
 		    End If
 		    
@@ -190,8 +193,9 @@ Protected Class XdocFile
 		  End If
 		  
 		  Const kVisibility = 2
-		  Const kName = 3
-		  Const kType = 4
+		  Const kShared = 4
+		  Const kName = 5
+		  Const kType = 6
 		  
 		  Dim match As RegExMatch = MatchPropertySignature(line)
 		  prop.Declaration = line
@@ -205,11 +209,19 @@ Protected Class XdocFile
 
 
 	#tag Property, Flags = &h0
+		EventDefinitions() As XdocMethod
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		Events() As XdocMethod
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		File As FolderItem
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Id As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -222,6 +234,10 @@ Protected Class XdocFile
 
 	#tag Property, Flags = &h0
 		Notes() As XdocNote
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		ParentId As String = "&h0"
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
