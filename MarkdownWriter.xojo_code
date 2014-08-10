@@ -1,10 +1,11 @@
 #tag Class
 Protected Class MarkdownWriter
-	#tag Method, Flags = &h0
-		Function GetParent(root As FolderItem, f As XdocFile) As FolderItem
+	#tag Method, Flags = &h21
+		Private Function GetParent(root As FolderItem, f As XdocFile, ByRef fullName As String) As FolderItem
 		  Dim filename As String = f.Name + ".md"
 		  
 		  If f.ParentId = "" Or f.ParentId = "&h0" Then
+		    fullname = f.Name
 		    Return root.Child(filename)
 		  End If
 		  
@@ -16,15 +17,21 @@ Protected Class MarkdownWriter
 		    current = Project.Folders.Lookup(current.ParentId, Nil)
 		  Loop Until current Is Nil
 		  
+		  Dim parentNames() As String
 		  Dim fh As FolderItem = root
 		  
 		  For i As Integer = parents.Ubound DownTo 0
+		    parentNames.Append parents(i).Name
 		    fh = fh.Child(parents(i).Name)
 		    
 		    If Not fh.Exists Then
 		      fh.CreateAsFolder
 		    End If
 		  Next
+		  
+		  parentNames.Append f.Name
+		  
+		  fullName = Join(parentNames, ".")
 		  
 		  Return fh.Child(filename)
 		  
@@ -36,10 +43,11 @@ Protected Class MarkdownWriter
 		  Self.Project = project
 		  
 		  For Each f As XdocFile In project.Files
-		    Dim fh As FolderItem = GetParent(path, f)
+		    Dim fullName As String
+		    Dim fh As FolderItem = GetParent(path, f, fullName)
 		    Dim tos As TextOutputStream = TextOutputStream.Create(fh)
 		    
-		    tos.WriteLine "# " + f.Type + " " +  f.Name
+		    tos.WriteLine "# " + f.Type + " " +  fullName
 		    tos.WriteLine ""
 		    
 		    //

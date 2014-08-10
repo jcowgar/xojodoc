@@ -74,7 +74,6 @@ Inherits ConsoleApplication
 
 
 	#tag Note, Name = TODO
-		* Print full class/module names for H1
 		* Option to write to a single file
 		* Hyperlink to referenced classes
 		* Have a specific note in the App class named Project, it should be the very first thing written, not part of App class, but as a full project overview
