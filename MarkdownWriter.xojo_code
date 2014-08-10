@@ -95,90 +95,86 @@ Protected Class MarkdownWriter
 		      End If
 		    End If
 		    
-		    If IncludeEvents And f.Events.Ubound > -1 Then
-		      tos.WriteLine "## Events"
-		      tos.WriteLine ""
-		      
-		      For Each m As XdocMethod In f.Events
-		        If m.Visibility = XdocProject.kVisibilityPrivate And Not IncludePrivate Then
-		          Continue
-		        End If
-		        
-		        If m.Visibility = XdocProject.kVisibilityProtected And Not IncludeProtected Then
-		          Continue
-		        End If
-		        
-		        Dim methodLine As String = m.Name + "(" + Join(m.Parameters, ", ") + ")"
-		        If m.ReturnType <> "" Then
-		          methodLine = methodLine + " As " + m.ReturnType
-		        End If
-		        
-		        tos.WriteLine "### `" + methodLine + "`"
-		        tos.WriteLine m.Notes
-		        tos.WriteLine ""
-		      Next
+		    If IncludeEvents Then
+		      WriteMethods("Events", f.Events, tos)
 		    End If
 		    
-		    If f.Properties.Ubound > -1 Then
-		      Dim lines() As String
-		      
-		      For i As Integer = 0 To f.Properties.Ubound
-		        Dim p As XdocProperty = f.Properties(i)
-		        
-		        If p.Visibility = XdocProject.kVisibilityPrivate And Not IncludePrivate Then
-		          Continue
-		        End If
-		        
-		        If p.Visibility = XdocProject.kVisibilityProtected And Not IncludeProtected Then
-		          Continue
-		        End If
-		        
-		        lines.Append "### `" + p.Declaration + "`"
-		        lines.Append ""
-		        
-		        If p.Note <> "" Then
-		          lines.Append p.Note
-		        End If
-		        
-		        tos.WriteLine ""
-		      Next
-		      
-		      If lines.Ubound > -1 Then
-		        tos.WriteLine "## Properties"
-		        tos.WriteLine ""
-		        tos.WriteLine Join(lines, EndOfLine)
-		      End If
-		    End If
-		    
-		    If f.Methods.Ubound > -1 Then
-		      Dim methodLines() As String
-		      
-		      For Each m As XdocMethod In f.Methods
-		        If m.Visibility = XdocProject.kVisibilityPrivate And Not IncludePrivate Then
-		          Continue
-		        End If
-		        
-		        If m.Visibility = XdocProject.kVisibilityProtected And Not IncludeProtected Then
-		          Continue
-		        End If
-		        
-		        Dim methodLine As String = m.Name + "(" + Join(m.Parameters, ", ") + ")"
-		        If m.ReturnType <> "" Then
-		          methodLine = methodLine + " As " + m.ReturnType
-		        End If
-		        
-		        methodLines.Append "### `" + methodLine + "`"
-		        methodLines.Append m.Notes
-		        methodLines.Append ""
-		      Next
-		      
-		      If methodLines.Ubound > -1 Then
-		        tos.WriteLine "## Methods"
-		        tos.WriteLine ""
-		        tos.WriteLine Join(methodLines, EndOfLine)
-		      End If
-		    End If
+		    WriteProperties("Properties", f.Properties, tos)
+		    WriteMethods("Methods", f.Methods, tos)
+		    WriteProperties("Shared Properties", f.SharedProperties, tos)
+		    WriteMethods("Shared Methods", f.SharedMethods, tos)
 		  Next
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub WriteMethods(sectionTitle As String, meths() As XdocMethod, tos As TextOutputStream)
+		  If meths.Ubound > -1 Then
+		    Dim methodLines() As String
+		    
+		    For i As Integer = 0 To meths.Ubound
+		      Dim m As XdocMethod = meths(i)
+		      
+		      If m.Visibility = XdocProject.kVisibilityPrivate And Not IncludePrivate Then
+		        Continue
+		      End If
+		      
+		      If m.Visibility = XdocProject.kVisibilityProtected And Not IncludeProtected Then
+		        Continue
+		      End If
+		      
+		      Dim methodLine As String = m.Name + "(" + Join(m.Parameters, ", ") + ")"
+		      If m.ReturnType <> "" Then
+		        methodLine = methodLine + " As " + m.ReturnType
+		      End If
+		      
+		      methodLines.Append "### `" + methodLine + "`"
+		      methodLines.Append m.Notes
+		      methodLines.Append ""
+		    Next
+		    
+		    If methodLines.Ubound > -1 Then
+		      tos.WriteLine "## " + sectionTitle
+		      tos.WriteLine ""
+		      tos.WriteLine Join(methodLines, EndOfLine)
+		    End If
+		  End If
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub WriteProperties(sectionTitle As String, props() As XdocProperty, tos As TextOutputStream)
+		  If props.Ubound > -1 Then
+		    Dim lines() As String
+		    
+		    For i As Integer = 0 To props.Ubound
+		      Dim p As XdocProperty = props(i)
+		      
+		      If p.Visibility = XdocProject.kVisibilityPrivate And Not IncludePrivate Then
+		        Continue
+		      End If
+		      
+		      If p.Visibility = XdocProject.kVisibilityProtected And Not IncludeProtected Then
+		        Continue
+		      End If
+		      
+		      lines.Append "### `" + p.Declaration + "`"
+		      lines.Append ""
+		      
+		      If p.Note <> "" Then
+		        lines.Append p.Note
+		      End If
+		      
+		      lines.Append ""
+		    Next
+		    
+		    If lines.Ubound > -1 Then
+		      tos.WriteLine "## " + sectionTitle
+		      tos.WriteLine ""
+		      tos.WriteLine Join(lines, EndOfLine)
+		    End If
+		  End If
+		  
 		End Sub
 	#tag EndMethod
 

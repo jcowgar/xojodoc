@@ -23,7 +23,7 @@ Protected Class XdocFile
 		  
 		  If rx Is Nil Then
 		    rx = New RegEx
-		    rx.SearchPattern = "(?mi-Us)(Private|Protected|Public|Global)*\s(Event|Function|Sub)\s([a-z0-9_]+)\((.*)\)(\sAs\s(.*))*"
+		    rx.SearchPattern = "(?mi-Us)((Shared)\s)*((Private|Protected|Public|Global)\s)*(Event|Function|Sub)\s([a-z0-9_]+)\((.*)\)(\sAs\s(.*))*"
 		    
 		    dim rxOptions As RegExOptions = rx.Options
 		    rxOptions.LineEndType = 4
@@ -82,16 +82,23 @@ Protected Class XdocFile
 		      Dim tagType As String = match.SubExpressionString(1)
 		      Select Case match.SubExpressionString(1)
 		      Case "Method"
-		        Methods.Append ParseMethod(tis)
+		        Dim m As XdocMethod = ParseMethod(tis)
+		        If m.IsShared Then
+		          SharedMethods.Append m
+		        Else
+		          Methods.Append m
+		        End If
 		        
 		      Case "Event"
 		        Events.Append ParseMethod(tis)
 		        
-		      Case "ComputedProperty"
-		        Properties.Append ParseProperty(tis)
-		        
-		      Case "Property"
-		        Properties.Append ParseProperty(tis)
+		      Case "ComputedProperty", "Property"
+		        Dim p As XdocProperty = ParseProperty(tis)
+		        If p.IsShared Then
+		          SharedProperties.Append p
+		        Else
+		          Properties.Append p
+		        End If
 		        
 		      Case "Note"
 		        Notes.Append ParseNote(tis, match.SubExpressionString(3))
@@ -107,11 +114,12 @@ Protected Class XdocFile
 
 	#tag Method, Flags = &h21
 		Private Function ParseMethod(tis As TextInputStream) As XdocMethod
-		  Const kVisibility = 1
-		  Const kType = 2
-		  Const kName = 3
-		  Const kParameters = 4
-		  Const kReturnType = 6
+		  Const kShared = 2
+		  Const kVisibility = 4
+		  Const kType = 5
+		  Const kName = 6
+		  Const kParameters = 7
+		  Const kReturnType = 9
 		  
 		  Dim line As String = tis.ReadLine
 		  Dim match As RegExMatch = MatchMethodSignature(line)
@@ -152,6 +160,8 @@ Protected Class XdocFile
 		  If match.SubExpressionCount > kReturnType Then
 		    meth.ReturnType = match.SubExpressionString(kReturnType)
 		  End If
+		  
+		  meth.IsShared = (match.SubExpressionString(kShared) <> "")
 		  
 		  meth.Notes = Join(notes, EndOfLine)
 		  
@@ -241,7 +251,7 @@ Protected Class XdocFile
 		  prop.Visibility = XdocProject.VisibilityFor(match.SubExpressionString(kVisibility))
 		  prop.Name = match.SubExpressionString(kName)
 		  prop.Type = match.SubExpressionString(kType)
-		  prop.IsShared = match.SubExpressionString(kShared) <> ""
+		  prop.IsShared = (match.SubExpressionString(kShared) <> "")
 		  
 		  EatTillTagEnd(tis)
 		  
@@ -284,6 +294,14 @@ Protected Class XdocFile
 
 	#tag Property, Flags = &h0
 		Properties() As XdocProperty
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		SharedMethods() As XdocMethod
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		SharedProperties() As XdocProperty
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
