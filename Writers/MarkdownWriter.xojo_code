@@ -41,6 +41,20 @@ Protected Class MarkdownWriter
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function IdString(ParamArray values() As String) As String
+		  Dim v() As String
+		  
+		  For i As Integer = 0 To values.Ubound
+		    Dim value As String = values(i)
+		    
+		    v.Append value.ReplaceAll(" ", "").ReplaceAll("(", "").ReplaceAll(")", "")
+		  Next
+		  
+		  Return Join(v, ".")
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub Write(path As FolderItem, project As XdocProject, asSingleFile As Boolean = False)
 		  Self.Project = project
@@ -89,26 +103,23 @@ Protected Class MarkdownWriter
 		    Dim notes() As XdocNote = f.Notes
 		    
 		    If notes.Ubound > -1 Then
-		      tos.WriteLine "## Notes"
-		      tos.WriteLine ""
-		      
 		      For i As Integer = 0 To notes.Ubound
-		        tos.WriteLine "### " + notes(i).Name
+		        tos.WriteLine "## " + notes(i).Name + " {#" + IdString(f.FullName, notes(i).Name) + "}"
 		        tos.WriteLine notes(i).Text
 		        tos.WriteLine ""
 		      Next
 		    End If
 		    
-		    WriteConstants(f.Constants, tos)
+		    WriteConstants(f, tos)
 		    
 		    If f.Enums.Ubound > -1 Then
-		      tos.WriteLine "## Enums"
+		      tos.WriteLine "## Enums  {#" + f.FullName + ".Enums}"
 		      tos.WriteLine ""
 		      
 		      For i As Integer = 0 To f.Enums.Ubound
 		        Dim e As XdocEnum = f.Enums(i)
 		        
-		        tos.WriteLine "### `" + e.Name + "`"
+		        tos.WriteLine "### " + e.Name + " {#" + IdString(f.FullName, e.Name) + "}"
 		        If e.Tag.Description <> "" Then
 		          tos.WriteLine e.Tag.Description
 		          tos.WriteLine ""
@@ -124,7 +135,7 @@ Protected Class MarkdownWriter
 		    End If
 		    
 		    If f.EventDefinitions.Ubound > -1 Then
-		      tos.WriteLine "## Event Definitions"
+		      tos.WriteLine "## Event Definitions {#" + IdString(f.FullName, "EventDefinitions") + "}"
 		      tos.WriteLine ""
 		      
 		      For Each m As XdocMethod In f.EventDefinitions
@@ -133,7 +144,7 @@ Protected Class MarkdownWriter
 		          line = line + " As " + m.ReturnType
 		        End If
 		        
-		        tos.WriteLine "### `" + line + "`"
+		        tos.WriteLine "### " + line + " {#" + IdString(f.FullName, m.Name) + "}"
 		        If m.Tag.Description <> "" Then
 		          tos.WriteLine m.Tag.Description
 		        End If
@@ -142,13 +153,13 @@ Protected Class MarkdownWriter
 		      Next
 		    End If
 		    
-		    WriteMethods("Events", f.Events, tos)
+		    WriteMethods("Events", f, f.Events, tos)
 		    
-		    WriteProperties("Properties", f.Properties, tos)
-		    WriteMethods("Methods", f.Methods, tos)
+		    WriteProperties("Properties", f, f.Properties, tos)
+		    WriteMethods("Methods", f, f.Methods, tos)
 		    
-		    WriteProperties("Shared Properties", f.SharedProperties, tos)
-		    WriteMethods("Shared Methods", f.SharedMethods, tos)
+		    WriteProperties("Shared Properties", f, f.SharedProperties, tos)
+		    WriteMethods("Shared Methods", f, f.SharedMethods, tos)
 		    
 		    If Not asSingleFile Then
 		      tos.Close
@@ -160,18 +171,17 @@ Protected Class MarkdownWriter
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub WriteConstants(consts() As XdocConstant, tos As TextOutputStream)
-		  If consts.Ubound = -1 Then
+		Private Sub WriteConstants(f As XdocFile, tos As TextOutputStream)
+		  If f.Constants.Ubound = -1 Then
 		    Return
 		  End If
 		  
-		  tos.WriteLine "## Constants"
+		  tos.WriteLine "## Constants {#" + IdString(f.FullName, "Constants") + "}"
 		  
-		  
-		  For i As Integer = 0 To consts.Ubound
-		    Dim c As XdocConstant = consts(i)
+		  For i As Integer = 0 To f.Constants.Ubound
+		    Dim c As XdocConstant = f.Constants(i)
 		    
-		    tos.WriteLine "### `" + c.Name + " As " + c.Type + " = " + c.Value + "`"
+		    tos.WriteLine "### " + c.Name + " As " + c.Type + " = " + c.Value + " {#" + IdString(f.FullName, c.Name) + "}"
 		    If c.Tag.Description <> "" Then
 		      tos.WriteLine c.Tag.Description
 		    End If
@@ -183,12 +193,12 @@ Protected Class MarkdownWriter
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub WriteMethods(sectionTitle As String, meths() As XdocMethod, tos As TextOutputStream)
+		Private Sub WriteMethods(sectionTitle As String, f As XdocFile, meths() As XdocMethod, tos As TextOutputStream)
 		  If meths.Ubound = -1 Then
 		    Return
 		  End If
 		  
-		  tos.WriteLine "## " + sectionTitle
+		  tos.WriteLine "## " + sectionTitle + " {#" + IdString(f.FullName, sectionTitle) + "}"
 		  tos.WriteLine ""
 		  
 		  If meths.Ubound > -1 Then
@@ -200,7 +210,7 @@ Protected Class MarkdownWriter
 		        methodLine = methodLine + " As " + m.ReturnType
 		      End If
 		      
-		      tos.WriteLine "### `" + methodLine + "`"
+		      tos.WriteLine "### " + methodLine + " {#" + IdString(f.FullName, m.Name) + "}"
 		      If m.Tag.Description <> "" Then
 		        tos.WriteLine m.Tag.Description
 		        tos.WriteLine ""
@@ -216,19 +226,19 @@ Protected Class MarkdownWriter
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub WriteProperties(sectionTitle As String, props() As XdocProperty, tos As TextOutputStream)
+		Private Sub WriteProperties(sectionTitle As String, f As XdocFile, props() As XdocProperty, tos As TextOutputStream)
 		  If props.Ubound = -1 Then
 		    Return
 		  End If
 		  
-		  tos.WriteLine "## " + sectionTitle
+		  tos.WriteLine "## " + sectionTitle + " {#" + IdString(f.FullName, sectionTitle) + "}"
 		  tos.WriteLine ""
 		  
 		  If props.Ubound > -1 Then
 		    For i As Integer = 0 To props.Ubound
 		      Dim p As XdocProperty = props(i)
 		      
-		      tos.WriteLine "### `" + p.Declaration + "`"
+		      tos.WriteLine "### " + p.Declaration + " {#" + IdString(f.FullName, p.Name) + "}"
 		      tos.WriteLine ""
 		      
 		      If p.Tag.Description <> "" Then

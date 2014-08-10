@@ -33,8 +33,8 @@ Protected Class XdocFile
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		 Shared Function MatchPropertySignature(text As String) As RegExMatch
+	#tag Method, Flags = &h21
+		Private Shared Function MatchPropertySignature(text As String) As RegExMatch
 		  Static rx As RegEx
 		  
 		  If rx Is Nil Then
@@ -49,8 +49,8 @@ Protected Class XdocFile
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		 Shared Function MatchTag(text As String) As RegExMatch
+	#tag Method, Flags = &h21
+		Private Shared Function MatchTag(text As String) As RegExMatch
 		  Static rx As RegEx
 		  
 		  If rx Is Nil Then
@@ -67,6 +67,26 @@ Protected Class XdocFile
 
 	#tag Method, Flags = &h0, Description = 50617273652074686520636F6E74656E7473206F66207468652066696C6520706F70756C6174696E67206974732070726F70657274696573
 		Sub Parse(flags As Integer)
+		  // #### Parameters:
+		  //
+		  // * `flags` - Bit flags regarding what to include or not, see [App.kIncludeEvents](#App.kIncludeEvents),
+		  //   [App.kIncludePrivate](#App.kIncludePrivate),
+		  //   [App.kIncludeProtected](#App.kIncludeProtected)
+		  //
+		  // #### Notes:
+		  //
+		  // Current parses Event Definitions, Constants, Properties, Computed Properties, 
+		  // Methods, Events and Notes. Information is stored such as visibility, shared/instance,
+		  // etc...
+		  //
+		  // Events, Event Definitions and Methods are all parsed as a [Xdoc.XdocMethod]. All other
+		  // items have specific classes to represent the parsed data.
+		  //
+		  // #### See Also:
+		  //
+		  // [Xdoc.XdocConstant], [Xdoc.XdocProperty], [Xdoc.XdocMethod] and [Xdoc.XdocNote].
+		  //
+		  
 		  Const kNone = 0
 		  Const kMethod = 1
 		  Const kProperty = 2

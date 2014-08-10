@@ -1,5 +1,11 @@
 #tag Class
 Protected Class XdocConstant
+	#tag Note, Name = Overview
+		Represent a Constant found in an [Xdoc.XdocFile].
+		
+	#tag EndNote
+
+
 	#tag Property, Flags = &h0
 		Description As String
 	#tag EndProperty

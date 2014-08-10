@@ -8,16 +8,19 @@ Inherits ConsoleApplication
 		  Project = New XdocProject(ProjectFile)
 		  Project.ReadManifest
 		  
-		  For fIdx As Integer = 0 To Project.Files.Ubound
+		  For fIdx As Integer = Project.Files.Ubound DownTo 0
 		    Dim file As XdocFile = Project.Files(fIdx)
 		    
 		    For Each exclude As String In ExcludePackages
 		      If file.FullName.InStr(exclude) = 1 Then
-		        Print "  Skipping: " + file.File.Name
-		        Continue For fIdx
+		        Print "  Skipping: " + file.FullName
+		        Project.Files.Remove fIdx
 		      End If
 		    Next
-		    
+		  Next
+		  
+		  For fIdx As Integer = 0 To Project.Files.Ubound
+		    Dim file As XdocFile = Project.Files(fIdx)
 		    Print "Processing: " + file.File.Name
 		    file.Parse(Flags)
 		    
@@ -173,13 +176,13 @@ Inherits ConsoleApplication
 	#tag EndProperty
 
 
-	#tag Constant, Name = kIncludeEvents, Type = Double, Dynamic = False, Default = \"4", Scope = Public
+	#tag Constant, Name = kIncludeEvents, Type = Double, Dynamic = False, Default = \"4", Scope = Public, Description = 42697420666F7220466C61677320746F20696E6469636174652063616C6C65722077616E747320746F20696E636C756465204576656E747320696E2074686520646F63756D656E746174696F6E
 	#tag EndConstant
 
-	#tag Constant, Name = kIncludePrivate, Type = Double, Dynamic = False, Default = \"1", Scope = Public
+	#tag Constant, Name = kIncludePrivate, Type = Double, Dynamic = False, Default = \"1", Scope = Public, Description = 42697420666F7220466C61677320746F20696E6469636174652063616C6C65722077616E747320746F20696E636C7564652050726976617465206D656D6265727320696E2074686520646F63756D656E746174696F6E
 	#tag EndConstant
 
-	#tag Constant, Name = kIncludeProtected, Type = Double, Dynamic = False, Default = \"2", Scope = Public
+	#tag Constant, Name = kIncludeProtected, Type = Double, Dynamic = False, Default = \"2", Scope = Public, Description = 42697420666F7220466C61677320746F20696E6469636174652063616C6C65722077616E747320746F20696E636C7564652050726F746563746564206D656D6265727320696E2074686520646F63756D656E746174696F6E
 	#tag EndConstant
 
 
