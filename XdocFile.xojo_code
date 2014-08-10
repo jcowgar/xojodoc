@@ -143,13 +143,17 @@ Protected Class XdocFile
 		      c.Value = kv(1)
 		      
 		      If c.Value.Left(2) = "\""" Then
-		        c.Value = c.Value.Mid(3, c.Value.Len - 4)
+		        c.Value = c.Value.Mid(3, c.Value.Len - 3)
 		      End If
 		      
 		    Case "Scope"
 		      c.Visibility = XdocProject.VisibilityFor(kv(1))
 		    End Select
 		  Next
+		  
+		  If c.Type = "String" Then
+		    c.Value = """" + c.Value + """"
+		  End If
 		  
 		  Return c
 		End Function
