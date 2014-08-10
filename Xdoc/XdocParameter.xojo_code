@@ -1,29 +1,15 @@
 #tag Class
-Protected Class XdocFolder
-	#tag Property, Flags = &h0
-		Id As String
-	#tag EndProperty
-
+Protected Class XdocParameter
 	#tag Property, Flags = &h0
 		Name As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		ParentId As String = "&h0"
+		Type As String
 	#tag EndProperty
 
 
 	#tag ViewBehavior
-		#tag ViewProperty
-			Name="ContainerId"
-			Group="Behavior"
-			Type="String"
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="Id"
-			Group="Behavior"
-			Type="String"
-		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
 			Visible=true
@@ -56,6 +42,11 @@ Protected Class XdocFolder
 			Group="Position"
 			InitialValue="0"
 			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Type"
+			Group="Behavior"
+			Type="String"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

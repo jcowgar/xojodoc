@@ -112,7 +112,6 @@ Inherits ConsoleApplication
 		  When an item appears in this note, it should not be output as a generic, non-documented item. All items not
 		  in the note should be output as they are now, in a non-documented fashion
 		* Unescape constants, for example "first\x2Clast\X2Cage"
-		* Exclude package option
 	#tag EndNote
 
 

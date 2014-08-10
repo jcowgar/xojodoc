@@ -329,7 +329,7 @@ Protected Class OptionParser
 		  // If it was, all bets are off and up to the caller to validate.
 		  //
 		  
-		  If Not Self.HelpRequested Then 
+		  If Not Self.HelpRequested Then
 		    If ExtrasRequired > 0 And Extra.Ubound < (ExtrasRequired - 1) Then
 		      Raise New OptionParserException("Insufficient extras specified")
 		    End If
@@ -416,7 +416,7 @@ Protected Class OptionParser
 		  Dim helpFor As String = AppName
 		  If helpFor <> "" Then
 		    If AppDescription <> "" Then
-		      helpFor = kIndentPrefix + helpFor + " - " + AppDescription 
+		      helpFor = kIndentPrefix + helpFor + " - " + AppDescription
 		    End If
 		    Print helpFor
 		    Print ""
