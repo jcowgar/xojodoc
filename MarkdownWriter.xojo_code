@@ -1,11 +1,36 @@
 #tag Class
 Protected Class MarkdownWriter
 	#tag Method, Flags = &h21
-		Private Function GetParent(root As FolderItem, f As XdocFile, ByRef fullName As String) As FolderItem
+		Private Function GetFullName(f As XdocFile) As String
+		  If f.ParentId = "" Or f.ParentId = "&h0" Then
+		    Return f.Name
+		  End If
+		  
+		  Dim current As XdocFolder = Project.Folders.Value(f.ParentId)
+		  Dim parents() As XdocFolder
+		  
+		  Do
+		    parents.Append current
+		    current = Project.Folders.Lookup(current.ParentId, Nil)
+		  Loop Until current Is Nil
+		  
+		  Dim parentNames() As String
+		  
+		  For i As Integer = parents.Ubound DownTo 0
+		    parentNames.Append parents(i).Name
+		  Next
+		  
+		  parentNames.Append f.Name
+		  
+		  Return Join(parentNames, ".")
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function GetParent(root As FolderItem, f As XdocFile) As FolderItem
 		  Dim filename As String = f.Name + ".md"
 		  
 		  If f.ParentId = "" Or f.ParentId = "&h0" Then
-		    fullname = f.Name
 		    If root Is Nil Then
 		      Return Nil
 		    End If
@@ -21,12 +46,9 @@ Protected Class MarkdownWriter
 		    current = Project.Folders.Lookup(current.ParentId, Nil)
 		  Loop Until current Is Nil
 		  
-		  Dim parentNames() As String
 		  Dim fh As FolderItem = root
 		  
 		  For i As Integer = parents.Ubound DownTo 0
-		    parentNames.Append parents(i).Name
-		    
 		    If Not (root Is Nil) Then
 		      fh = fh.Child(parents(i).Name)
 		      
@@ -35,10 +57,6 @@ Protected Class MarkdownWriter
 		      End If
 		    End If
 		  Next
-		  
-		  parentNames.Append f.Name
-		  
-		  fullName = Join(parentNames, ".")
 		  
 		  If root Is Nil Then
 		    Return Nil
@@ -59,9 +77,20 @@ Protected Class MarkdownWriter
 		    tos = TextOutputStream.Create(path)
 		  End If
 		  
-		  For Each f As XdocFile In project.Files
-		    Dim fullName As String
-		    Dim fh As FolderItem = GetParent(If(asSingleFile, Nil, path), f, fullName)
+		  Dim files() As XdocFile = project.Files
+		  Dim fileNames() As String
+		  ReDim fileNames(files.Ubound)
+		  
+		  For fileIdx As Integer = 0 To files.Ubound
+		    fileNames(fileIdx) = GetFullName(files(fileIdx))
+		  Next
+		  
+		  fileNames.SortWith(files)
+		  
+		  For fileIdx As Integer = 0 To files.Ubound
+		    Dim fullName As String = fileNames(fileIdx)
+		    Dim f As XdocFile = files(fileIdx)
+		    Dim fh As FolderItem = GetParent(If(asSingleFile, Nil, path), f)
 		    
 		    If Not asSingleFile Then
 		      tos = TextOutputStream.Create(fh)
@@ -274,6 +303,21 @@ Protected Class MarkdownWriter
 
 
 	#tag ViewBehavior
+		#tag ViewProperty
+			Name="IncludeEvents"
+			Group="Behavior"
+			Type="Boolean"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="IncludePrivate"
+			Group="Behavior"
+			Type="Boolean"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="IncludeProtected"
+			Group="Behavior"
+			Type="Boolean"
+		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
 			Visible=true
