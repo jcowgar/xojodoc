@@ -8,9 +8,23 @@ Inherits ConsoleApplication
 		  Project = New XdocProject(ProjectFile)
 		  Project.ReadManifest
 		  
-		  For Each file As XdocFile In Project.Files
+		  For fIdx As Integer = 0 To Project.Files.Ubound
+		    Dim file As XdocFile = Project.Files(fIdx)
 		    Print "Processing: " + file.File.Name
 		    file.Parse
+		    
+		    If Not (OutputFile Is Nil) And file.Name = "App" Then
+		      // Look for a "Project Overview" Note
+		      For nIdx As Integer = 0 To file.Notes.Ubound
+		        Dim n As XdocNote = file.Notes(nIdx)
+		        
+		        If n.Name = "Project Overview" Then
+		          Project.ProjectNote = n
+		          file.Notes.Remove nIdx
+		          Exit For nIdx
+		        End If
+		      Next
+		    End If
 		  Next
 		  
 		  Dim mdw As New MarkdownWriter
@@ -104,13 +118,14 @@ Inherits ConsoleApplication
 		Event Xyz123() As String
 	#tag EndHook
 
+	#tag Note, Name = Project Overview
+		xojodoc is an application that will process a Xojo manifest file and create
+		source level documentation for the project and all included items.
+		
+	#tag EndNote
 
 	#tag Note, Name = TODO
 		* Hyperlink to referenced classes
-		* Have a specific note in the App class named Project, it should be the very first thing written, not part of App class, but as a full project overview
-		* Have a specific note to document Enums and Event Definitions since they can not be documented directly.
-		  When an item appears in this note, it should not be output as a generic, non-documented item. All items not
-		  in the note should be output as they are now, in a non-documented fashion
 		* Unescape constants, for example "first\x2Clast\X2Cage"
 	#tag EndNote
 
@@ -131,7 +146,7 @@ Inherits ConsoleApplication
 		Private OutputFolder As FolderItem
 	#tag EndProperty
 
-	#tag Property, Flags = &h0
+	#tag Property, Flags = &h0, Description = 4D61696E2070726F6A656374207265666572656E6365
 		Project As XdocProject
 	#tag EndProperty
 

@@ -99,6 +99,10 @@ Protected Class XdocProject
 		Folders As Dictionary
 	#tag EndProperty
 
+	#tag Property, Flags = &h0
+		ProjectNote As XdocNote
+	#tag EndProperty
+
 
 	#tag Constant, Name = kVisibilityGlobal, Type = Double, Dynamic = False, Default = \"4", Scope = Public
 	#tag EndConstant

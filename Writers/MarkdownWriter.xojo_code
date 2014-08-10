@@ -75,6 +75,15 @@ Protected Class MarkdownWriter
 		  
 		  If asSingleFile Then
 		    tos = TextOutputStream.Create(path)
+		    
+		    If Not (project.ProjectNote Is Nil) Then
+		      Dim name As String = project.File.Name
+		      name = name.Left(name.Len - 13)
+		      
+		      tos.WriteLine "# " + name + " Overview"
+		      tos.WriteLine project.ProjectNote.Text
+		      tos.WriteLine ""
+		    End If
 		  End If
 		  
 		  Dim files() As XdocFile = project.Files
