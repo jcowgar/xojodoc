@@ -105,11 +105,32 @@ Protected Class XdocFile
 		        
 		      Case "Hook"
 		        EventDefinitions.Append ParseMethod(tis)
+		        
+		      Case "Enum"
+		        Enums.Append ParseEnum(tis, match.SubExpressionString(3))
+		        
+		        
 		      End Select
 		    End If
 		    
 		  Wend
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function ParseEnum(tis As TextInputStream, name As String) As XdocEnum
+		  Dim e As New XdocEnum
+		  e.Name = name
+		  
+		  Dim line As String = tis.ReadLine.Trim
+		  
+		  While line <> "#tag EndEnum"
+		    e.Values.Append line
+		    line = tis.ReadLine.Trim
+		  Wend
+		  
+		  Return e
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
@@ -259,6 +280,10 @@ Protected Class XdocFile
 		End Function
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h0
+		Enums() As XdocEnum
+	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		EventDefinitions() As XdocMethod

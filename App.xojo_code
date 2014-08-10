@@ -74,7 +74,7 @@ Inherits ConsoleApplication
 
 
 	#tag Note, Name = TODO
-		* Parse and Write Enums
+		
 		* Parse and Write Constants
 	#tag EndNote
 

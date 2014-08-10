@@ -74,6 +74,23 @@ Protected Class MarkdownWriter
 		      Next
 		    End If
 		    
+		    If f.Enums.Ubound > -1 Then
+		      tos.WriteLine "## Enums"
+		      tos.WriteLine ""
+		      
+		      For i As Integer = 0 To f.Enums.Ubound
+		        Dim e As XdocEnum = f.Enums(i)
+		        
+		        tos.WriteLine "### `" + e.Name + "`"
+		        
+		        For j As Integer = 0 To e.Values.Ubound
+		          tos.WriteLine "* `" + e.Values(j) + "`"
+		        Next
+		        
+		        tos.WriteLine ""
+		      Next
+		    End If
+		    
 		    If f.EventDefinitions.Ubound > -1 Then
 		      Dim lines() As String
 		      

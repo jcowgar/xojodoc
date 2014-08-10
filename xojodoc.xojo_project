@@ -21,6 +21,7 @@ Class=XdocParameter;XdocParameter.xojo_code;&h3EFA38FC;&h0;false
 Class=XdocProperty;XdocProperty.xojo_code;&h63276FD7;&h0;false
 Module=FolderItemHelpers;FolderItemHelpers.xojo_code;&h787C96C0;&h0;false
 Folder=OptionParser;OptionParser;&h64914B92;&h0;false
+Class=XdocEnum;XdocEnum.xojo_code;&h5333EAAF;&h0;false
 MajorVersion=1
 MinorVersion=0
 SubVersion=0
