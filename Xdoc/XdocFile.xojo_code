@@ -17,13 +17,13 @@ Protected Class XdocFile
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		 Shared Function MatchMethodSignature(text As String) As RegExMatch
+	#tag Method, Flags = &h21
+		Private Shared Function MatchMethodSignature(text As String) As RegExMatch
 		  Static rx As RegEx
 		  
 		  If rx Is Nil Then
 		    rx = New RegEx
-		    rx.SearchPattern = "(?mi-Us)((Shared)\s)*((Private|Protected|Public|Global)\s)*(Event|Function|Sub)\s([a-z0-9_]+)\((.*)\)(\sAs\s(.*))*"
+		    rx.SearchPattern = "(?mi-Us)((Private|Protected|Public|Global)\s)*((Shared)\s)*(Event|Function|Sub)\s([a-z0-9_]+)\((.*)\)(\sAs\s(.*))*"
 		    
 		    dim rxOptions As RegExOptions = rx.Options
 		    rxOptions.LineEndType = 4
@@ -212,8 +212,8 @@ Protected Class XdocFile
 
 	#tag Method, Flags = &h21
 		Private Function ParseMethod(tis As TextInputStream) As XdocMethod
-		  Const kShared = 2
-		  Const kVisibility = 4
+		  Const kVisibility = 2
+		  Const kShared = 4
 		  Const kType = 5
 		  Const kName = 6
 		  Const kParameters = 7
