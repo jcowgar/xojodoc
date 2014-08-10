@@ -74,9 +74,14 @@ Inherits ConsoleApplication
 
 
 	#tag Note, Name = TODO
-		* Write to a single file
-		* Write a TOC for each page
-		* Hyperlink
+		* Print full class/module names for H1
+		* Option to write to a single file
+		* Hyperlink to referenced classes
+		* Have a specific note in the App class named Project, it should be the very first thing written, not part of App class, but as a full project overview
+		* Have a specific note to document Enums and Event Definitions since they can not be documented directly.
+		  When an item appears in this note, it should not be output as a generic, non-documented item. All items not
+		  in the note should be output as they are now, in a non-documented fashion
+		
 		
 	#tag EndNote
 
