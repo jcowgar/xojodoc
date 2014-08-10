@@ -132,8 +132,19 @@ Protected Class XdocFile
 		        Constants.Append o
 		      End Select
 		    End If
-		    
 		  Wend
+		  
+		  For i As Integer = 0 To Notes.Ubound
+		    Dim n As XdocNote = Notes(i)
+		    
+		    If n.Name = "Overview" Then
+		      OverviewNote = n
+		      Notes.Remove i
+		      
+		      Exit For i
+		    End If
+		  Next
+		  
 		End Sub
 	#tag EndMethod
 
@@ -348,6 +359,10 @@ Protected Class XdocFile
 
 	#tag Property, Flags = &h0
 		Notes() As XdocNote
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		OverviewNote As XdocNote
 	#tag EndProperty
 
 	#tag Property, Flags = &h0

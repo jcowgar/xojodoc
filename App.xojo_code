@@ -106,18 +106,6 @@ Inherits ConsoleApplication
 	#tag EndMethod
 
 
-	#tag Hook, Flags = &h0, Description = 48656C6C6F20576F726C64
-		Event Abc()
-	#tag EndHook
-
-	#tag Hook, Flags = &h0
-		Event AbcXyz(name As String)
-	#tag EndHook
-
-	#tag Hook, Flags = &h0
-		Event Xyz123() As String
-	#tag EndHook
-
 	#tag Note, Name = Project Overview
 		xojodoc is an application that will process a Xojo manifest file and create
 		source level documentation for the project and all included items.

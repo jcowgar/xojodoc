@@ -115,26 +115,12 @@ Protected Class MarkdownWriter
 		    tos.WriteLine "# " + f.Type + " " +  fullName
 		    tos.WriteLine ""
 		    
-		    //
-		    // We want to print the Overview note first, if available.
-		    // Then all other notes in the order they appeared in the
-		    // documentation
-		    //
-		    
-		    Dim notes() As XdocNote = f.Notes
-		    Dim overviewNote As XdocNote
-		    For i As Integer = 0 To notes.Ubound
-		      If notes(i).Name = "Overview" Then
-		        overviewNote = notes(i)
-		        notes.Remove i
-		        Exit
-		      End If
-		    Next
-		    
-		    If Not (overviewNote Is Nil) Then
-		      tos.WriteLine overviewNote.Text
+		    If Not (f.OverviewNote Is Nil) Then
+		      tos.WriteLine f.OverviewNote.Text
 		      tos.WriteLine ""
 		    End If
+		    
+		    Dim notes() As XdocNote = f.Notes
 		    
 		    If notes.Ubound > -1 Then
 		      tos.WriteLine "## Notes"
