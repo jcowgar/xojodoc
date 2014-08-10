@@ -5,6 +5,10 @@ Protected Class XdocEnum
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		Tag As XdocTag
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		Values() As String
 	#tag EndProperty
 

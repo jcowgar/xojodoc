@@ -21,6 +21,10 @@ Protected Class XdocMethod
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		Tag As XdocTag
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		Type As Integer
 	#tag EndProperty
 
@@ -45,6 +49,11 @@ Protected Class XdocMethod
 			Type="Integer"
 		#tag EndViewProperty
 		#tag ViewProperty
+			Name="IsShared"
+			Group="Behavior"
+			Type="Boolean"
+		#tag EndViewProperty
+		#tag ViewProperty
 			Name="Left"
 			Visible=true
 			Group="Position"
@@ -55,6 +64,16 @@ Protected Class XdocMethod
 			Name="Name"
 			Visible=true
 			Group="ID"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Notes"
+			Group="Behavior"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="ReturnType"
+			Group="Behavior"
 			Type="String"
 		#tag EndViewProperty
 		#tag ViewProperty
@@ -72,6 +91,11 @@ Protected Class XdocMethod
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Type"
+			Group="Behavior"
+			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Visibility"
 			Group="Behavior"
 			Type="Integer"
 		#tag EndViewProperty

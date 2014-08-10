@@ -148,7 +148,12 @@ Protected Class MarkdownWriter
 		        Dim e As XdocEnum = f.Enums(i)
 		        
 		        tos.WriteLine "### `" + e.Name + "`"
+		        If e.Tag.Description <> "" Then
+		          tos.WriteLine e.Tag.Description
+		          tos.WriteLine ""
+		        End If
 		        
+		        tos.WriteLine "#### Values"
 		        For j As Integer = 0 To e.Values.Ubound
 		          tos.WriteLine "* `" + e.Values(j) + "`"
 		        Next
@@ -166,7 +171,12 @@ Protected Class MarkdownWriter
 		          line = line + " As " + m.ReturnType
 		        End If
 		        
-		        lines.Append "* `" + line + "`"
+		        lines.Append "### `" + line + "`"
+		        If m.Tag.Description <> "" Then
+		          lines.Append m.Tag.Description
+		        End If
+		        
+		        lines.Append ""
 		      Next
 		      
 		      If lines.Ubound > -1 Then
@@ -209,7 +219,11 @@ Protected Class MarkdownWriter
 		      Continue
 		    End If
 		    
-		    lines.Append "* `" + c.Name + " As " + c.Type + " = " + c.Value + "`"
+		    lines.Append "### `" + c.Name + " As " + c.Type + " = " + c.Value + "`"
+		    If c.Tag.Description <> "" Then
+		      lines.Append c.Tag.Description
+		    End If
+		    lines.Append ""
 		  Next
 		  
 		  If lines.Ubound > -1 Then
@@ -242,8 +256,15 @@ Protected Class MarkdownWriter
 		      End If
 		      
 		      methodLines.Append "### `" + methodLine + "`"
-		      methodLines.Append m.Notes
-		      methodLines.Append ""
+		      If m.Tag.Description <> "" Then
+		        methodLines.Append m.Tag.Description
+		        methodLines.Append ""
+		      End If
+		      
+		      If m.Notes <> "" Then
+		        methodLines.Append m.Notes
+		        methodLines.Append ""
+		      End If
 		    Next
 		    
 		    If methodLines.Ubound > -1 Then
@@ -274,11 +295,15 @@ Protected Class MarkdownWriter
 		      lines.Append "### `" + p.Declaration + "`"
 		      lines.Append ""
 		      
-		      If p.Note <> "" Then
-		        lines.Append p.Note
+		      If p.Tag.Description <> "" Then
+		        lines.Append p.Tag.Description
+		        lines.Append ""
 		      End If
 		      
-		      lines.Append ""
+		      If p.Note <> "" Then
+		        lines.Append p.Note
+		        lines.Append ""
+		      End If
 		    Next
 		    
 		    If lines.Ubound > -1 Then

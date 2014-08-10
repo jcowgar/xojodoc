@@ -17,6 +17,10 @@ Protected Class XdocProperty
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		Tag As XdocTag
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		Type As String
 	#tag EndProperty
 
@@ -30,6 +34,7 @@ Protected Class XdocProperty
 			Name="Declaration"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
@@ -37,6 +42,11 @@ Protected Class XdocProperty
 			Group="ID"
 			InitialValue="-2147483648"
 			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="IsShared"
+			Group="Behavior"
+			Type="Boolean"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Left"
@@ -55,6 +65,7 @@ Protected Class XdocProperty
 			Name="Note"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Super"
@@ -67,6 +78,16 @@ Protected Class XdocProperty
 			Visible=true
 			Group="Position"
 			InitialValue="0"
+			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Type"
+			Group="Behavior"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Visibility"
+			Group="Behavior"
 			Type="Integer"
 		#tag EndViewProperty
 	#tag EndViewBehavior

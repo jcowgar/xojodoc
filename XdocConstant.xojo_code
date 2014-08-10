@@ -1,7 +1,15 @@
 #tag Class
 Protected Class XdocConstant
 	#tag Property, Flags = &h0
+		Description As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		Name As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Tag As XdocTag
 	#tag EndProperty
 
 	#tag Property, Flags = &h0

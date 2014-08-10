@@ -55,7 +55,7 @@ Protected Class XdocFile
 		  
 		  If rx Is Nil Then
 		    rx = New RegEx
-		    rx.SearchPattern = "(?mi-Us)^\s*#tag\s([^,]+)(, Name = ([a-z0-9_ ]+))*"
+		    rx.SearchPattern = "(?mi-Us)^\s*#tag\s([^,]+)(, Name = ([a-z0-9_\- ]+))*"
 		    
 		    Dim rxOptions As RegExOptions = rx.Options
 		    rxOptions.LineEndType = 4
@@ -77,12 +77,14 @@ Protected Class XdocFile
 		  While Not tis.EOF
 		    Dim line As String = tis.ReadLine.Trim
 		    
-		    Dim match As RegExMatch = MatchTag(line)
-		    If match <> Nil Then
-		      Dim tagType As String = match.SubExpressionString(1)
-		      Select Case match.SubExpressionString(1)
+		    If line.Left(4) = "#tag" Then
+		      Dim t As New XdocTag(line)
+		      
+		      Select Case t.TagType
 		      Case "Method"
 		        Dim m As XdocMethod = ParseMethod(tis)
+		        m.Tag = t
+		        
 		        If m.IsShared Then
 		          SharedMethods.Append m
 		        Else
@@ -90,10 +92,15 @@ Protected Class XdocFile
 		        End If
 		        
 		      Case "Event"
-		        Events.Append ParseMethod(tis)
+		        Dim e As XdocMethod = ParseMethod(tis)
+		        e.Tag = t
+		        
+		        Events.Append e
 		        
 		      Case "ComputedProperty", "Property"
 		        Dim p As XdocProperty = ParseProperty(tis)
+		        p.Tag = t
+		        
 		        If p.IsShared Then
 		          SharedProperties.Append p
 		        Else
@@ -101,16 +108,28 @@ Protected Class XdocFile
 		        End If
 		        
 		      Case "Note"
-		        Notes.Append ParseNote(tis, match.SubExpressionString(3))
+		        Dim o As XdocNote = ParseNote(tis, t.Name)
+		        o.Tag = t
+		        
+		        Notes.Append o
 		        
 		      Case "Hook"
-		        EventDefinitions.Append ParseMethod(tis)
+		        Dim o As XdocMethod = ParseMethod(tis)
+		        o.Tag = t
+		        
+		        EventDefinitions.Append o
 		        
 		      Case "Enum"
-		        Enums.Append ParseEnum(tis, match.SubExpressionString(3))
+		        Dim o As XdocEnum = ParseEnum(tis, t.Name)
+		        o.Tag = t
+		        
+		        Enums.Append o
 		        
 		      Case "Constant"
-		        Constants.Append ParseConstant(tis, line)
+		        Dim o As XdocConstant = ParseConstant(tis, t)
+		        o.Tag = t
+		        
+		        Constants.Append o
 		      End Select
 		    End If
 		    
@@ -119,41 +138,13 @@ Protected Class XdocFile
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function ParseConstant(tis As TextInputStream, line As String) As XdocConstant
+		Private Function ParseConstant(tis As TextInputStream, tag As XdocTag) As XdocConstant
 		  Dim c As New XdocConstant
-		  
-		  Dim parts() As String = line.Split(", ")
-		  
-		  '#tag Constant, Name = kFunction, Type = Double, Dynamic = False, Default = \"1", Scope = Public
-		  
-		  For Each part As String In parts
-		    Dim kv() As String = part.Split(" = ")
-		    If kv.Ubound = 0 Then
-		      Continue
-		    End If
-		    
-		    Select Case kv(0)
-		    Case "Name"
-		      c.Name = kv(1)
-		      
-		    Case "Type"
-		      c.Type = kv(1)
-		      
-		    Case "Default"
-		      c.Value = kv(1)
-		      
-		      If c.Value.Left(2) = "\""" Then
-		        c.Value = c.Value.Mid(3, c.Value.Len - 3)
-		      End If
-		      
-		    Case "Scope"
-		      c.Visibility = XdocProject.VisibilityFor(kv(1))
-		    End Select
-		  Next
-		  
-		  If c.Type = "String" Then
-		    c.Value = """" + c.Value + """"
-		  End If
+		  c.Name = tag.Name
+		  c.Type = tag.Type
+		  c.Value = tag.Default
+		  c.Visibility = tag.Visibility
+		  c.Description = tag.Description
 		  
 		  Return c
 		End Function
@@ -382,6 +373,12 @@ Protected Class XdocFile
 
 	#tag ViewBehavior
 		#tag ViewProperty
+			Name="Id"
+			Group="Behavior"
+			Type="String"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
 			Name="Index"
 			Visible=true
 			Group="ID"
@@ -402,6 +399,13 @@ Protected Class XdocFile
 			Type="String"
 		#tag EndViewProperty
 		#tag ViewProperty
+			Name="ParentId"
+			Group="Behavior"
+			InitialValue="&h0"
+			Type="String"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
 			Name="Super"
 			Visible=true
 			Group="ID"
@@ -413,6 +417,12 @@ Protected Class XdocFile
 			Group="Position"
 			InitialValue="0"
 			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Type"
+			Group="Behavior"
+			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

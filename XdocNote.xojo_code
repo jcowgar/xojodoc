@@ -5,6 +5,10 @@ Protected Class XdocNote
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		Tag As XdocTag
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		Text As String
 	#tag EndProperty
 
@@ -40,6 +44,7 @@ Protected Class XdocNote
 			Name="Text"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Top"
