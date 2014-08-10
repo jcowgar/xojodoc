@@ -17,6 +17,7 @@ Inherits ConsoleApplication
 		  mdw.IncludePrivate = options.BooleanValue("include-private")
 		  mdw.IncludeProtected = options.BooleanValue("include-protected")
 		  mdw.IncludeEvents = options.BooleanValue("include-events")
+		  mdw.ExcludePackages = ExcludePackages
 		  
 		  Dim fh As FolderItem
 		  Dim asSingle As Boolean
@@ -55,6 +56,9 @@ Inherits ConsoleApplication
 		  o = New Option("", "include-events", "Include implemented events", Option.OptionType.Boolean)
 		  Options.AddOption o
 		  
+		  o = New Option("e", "exclude-items", "Exclude items beginning with Full Name of")
+		  Options.AddOption o
+		  
 		  Options.Parse(args)
 		  OutputFolder = Options.FileValue("output-directory")
 		  OutputFile = Options.FileValue("output-file")
@@ -83,11 +87,12 @@ Inherits ConsoleApplication
 		    Quit 1
 		  End If
 		  
+		  ExcludePackages = Options.StringValue("exclude-items").Split(",")
 		End Sub
 	#tag EndMethod
 
 
-	#tag Hook, Flags = &h0
+	#tag Hook, Flags = &h0, Description = 48656C6C6F20576F726C64
 		Event Abc()
 	#tag EndHook
 
@@ -110,6 +115,10 @@ Inherits ConsoleApplication
 		* Exclude package option
 	#tag EndNote
 
+
+	#tag Property, Flags = &h21
+		Private ExcludePackages() As String
+	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private Options As OptionParser

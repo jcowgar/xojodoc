@@ -89,6 +89,13 @@ Protected Class MarkdownWriter
 		  
 		  For fileIdx As Integer = 0 To files.Ubound
 		    Dim fullName As String = fileNames(fileIdx)
+		    
+		    For Each exclude As String In ExcludePackages
+		      If fullName.InStr(exclude) = 1 Then
+		        Continue For fileIdx
+		      End If
+		    Next
+		    
 		    Dim f As XdocFile = files(fileIdx)
 		    Dim fh As FolderItem = GetParent(If(asSingleFile, Nil, path), f)
 		    
@@ -284,6 +291,10 @@ Protected Class MarkdownWriter
 		End Sub
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h0
+		ExcludePackages() As String
+	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		IncludeEvents As Boolean
