@@ -65,7 +65,7 @@ Protected Class XdocFile
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
+	#tag Method, Flags = &h0, Description = 50617273652074686520636F6E74656E7473206F66207468652066696C6520706F70756C6174696E67206974732070726F70657274696573
 		Sub Parse(flags As Integer)
 		  Const kNone = 0
 		  Const kMethod = 1

@@ -101,8 +101,24 @@ Protected Class XdocProject
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
+	#tag Method, Flags = &h0, Description = 44657465726D696E65207669736962696C6974792069642066726F6D2061207669736962696C69747920737472696E67
 		 Shared Function VisibilityFor(text As String) As Integer
+		  //
+		  // Takes `""`, `"Private"`, `"Protected"`, `"Public"`, `"Global"` and will return one of:
+		  //
+		  // * [kVisibilityNone](#Xdoc.XdocProject.kVisibilityNone)
+		  // * [kVisibilityPrivate](#Xdoc.XdocProject.kVisibilityPrivate)
+		  // * [kVisibilityProtected](#Xdoc.XdocProject.kVisibilityProtected)
+		  // * [kVisibilityPublic](#Xdoc.XdocProject.kVisibilityPublic)
+		  // * [kVisibilityGlobal](#Xdoc.XdocProject.kVisibilityGlobal)
+		  //
+		  // #### Example:
+		  //
+		  // ~~~~vb.net
+		  // Dim visibility As Integer = XdocProject.VisibilityFor("Public")
+		  // ' Visibility = kVisibilityPublic
+		  // ~~~~
+		  
 		  Static values() As String = Array("", "Private", "Protected", "Public", "Global")
 		  
 		  If text = "" Then
