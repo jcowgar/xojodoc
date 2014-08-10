@@ -7,6 +7,16 @@ Protected Class XdocFile
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub EatTillTagEnd(tis As TextInputStream)
+		  Dim line As String
+		  
+		  While line.Left(8) <> "#tag End"
+		    line = tis.ReadLine.Trim
+		  Wend
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		 Shared Function MatchMethodSignature(text As String) As RegExMatch
 		  Static rx As RegEx
@@ -45,7 +55,7 @@ Protected Class XdocFile
 		  
 		  If rx Is Nil Then
 		    rx = New RegEx
-		    rx.SearchPattern = "(?mi-Us)^\s*#tag\s([a-z0-9_]+)(, Name = ([a-z0-9_ ]+))*"
+		    rx.SearchPattern = "(?mi-Us)^\s*#tag\s([^,]+)(, Name = ([a-z0-9_ ]+))*"
 		    
 		    Dim rxOptions As RegExOptions = rx.Options
 		    rxOptions.LineEndType = 4
@@ -69,12 +79,16 @@ Protected Class XdocFile
 		    
 		    Dim match As RegExMatch = MatchTag(line)
 		    If match <> Nil Then
+		      Dim tagType As String = match.SubExpressionString(1)
 		      Select Case match.SubExpressionString(1)
 		      Case "Method"
 		        Methods.Append ParseMethod(tis)
 		        
 		      Case "Event"
 		        Events.Append ParseMethod(tis)
+		        
+		      Case "ComputedProperty"
+		        Properties.Append ParseProperty(tis)
 		        
 		      Case "Property"
 		        Properties.Append ParseProperty(tis)
@@ -141,6 +155,8 @@ Protected Class XdocFile
 		  
 		  meth.Notes = Join(notes, EndOfLine)
 		  
+		  EatTillTagEnd(tis)
+		  
 		  Return meth
 		End Function
 	#tag EndMethod
@@ -182,6 +198,23 @@ Protected Class XdocFile
 		  '  File As FolderItem
 		  '#tag EndProperty
 		  
+		  '#tag ComputedProperty, Flags = &h0
+		  '  #tag Note
+		  '    Get or Set the font's BOLD state
+		  '  #tag EndNote
+		  '  #tag Getter
+		  '    Get
+		  '      Return Run.Bold
+		  '    End Get
+		  '  #tag EndGetter
+		  '  #tag Setter
+		  '    Set
+		  '      Run.Bold = value
+		  '    End Set
+		  '  #tag EndSetter
+		  '  Bold As Boolean
+		  '#tag EndComputedProperty
+		  
 		  Dim prop As New XdocProperty
 		  Dim line As String = tis.ReadLine.Trim
 		  
@@ -191,6 +224,12 @@ Protected Class XdocFile
 		    
 		    line = tis.ReadLine.Trim
 		  End If
+		  
+		  While line.Left(4) = "#tag"
+		    EatTillTagEnd(tis)
+		    
+		    line = tis.ReadLine.Trim
+		  Wend
 		  
 		  Const kVisibility = 2
 		  Const kShared = 4
@@ -202,6 +241,9 @@ Protected Class XdocFile
 		  prop.Visibility = XdocProject.VisibilityFor(match.SubExpressionString(kVisibility))
 		  prop.Name = match.SubExpressionString(kName)
 		  prop.Type = match.SubExpressionString(kType)
+		  prop.IsShared = match.SubExpressionString(kShared) <> ""
+		  
+		  EatTillTagEnd(tis)
 		  
 		  Return prop
 		End Function

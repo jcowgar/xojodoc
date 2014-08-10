@@ -5,6 +5,10 @@ Protected Class XdocProperty
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		IsShared As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		Name As String
 	#tag EndProperty
 
