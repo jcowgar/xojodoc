@@ -109,12 +109,50 @@ Protected Class XdocFile
 		      Case "Enum"
 		        Enums.Append ParseEnum(tis, match.SubExpressionString(3))
 		        
-		        
+		      Case "Constant"
+		        Constants.Append ParseConstant(tis, line)
 		      End Select
 		    End If
 		    
 		  Wend
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function ParseConstant(tis As TextInputStream, line As String) As XdocConstant
+		  Dim c As New XdocConstant
+		  
+		  Dim parts() As String = line.Split(", ")
+		  
+		  '#tag Constant, Name = kFunction, Type = Double, Dynamic = False, Default = \"1", Scope = Public
+		  
+		  For Each part As String In parts
+		    Dim kv() As String = part.Split(" = ")
+		    If kv.Ubound = 0 Then
+		      Continue
+		    End If
+		    
+		    Select Case kv(0)
+		    Case "Name"
+		      c.Name = kv(1)
+		      
+		    Case "Type"
+		      c.Type = kv(1)
+		      
+		    Case "Default"
+		      c.Value = kv(1)
+		      
+		      If c.Value.Left(2) = "\""" Then
+		        c.Value = c.Value.Mid(3, c.Value.Len - 4)
+		      End If
+		      
+		    Case "Scope"
+		      c.Visibility = XdocProject.VisibilityFor(kv(1))
+		    End Select
+		  Next
+		  
+		  Return c
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
@@ -280,6 +318,10 @@ Protected Class XdocFile
 		End Function
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h0
+		Constants() As XdocConstant
+	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		Enums() As XdocEnum

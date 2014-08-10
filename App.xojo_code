@@ -74,8 +74,10 @@ Inherits ConsoleApplication
 
 
 	#tag Note, Name = TODO
+		* Write to a single file
+		* Write a TOC for each page
+		* Hyperlink
 		
-		* Parse and Write Constants
 	#tag EndNote
 
 

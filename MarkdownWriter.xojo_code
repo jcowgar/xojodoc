@@ -74,6 +74,8 @@ Protected Class MarkdownWriter
 		      Next
 		    End If
 		    
+		    WriteConstants(f.Constants, tos)
+		    
 		    If f.Enums.Ubound > -1 Then
 		      tos.WriteLine "## Enums"
 		      tos.WriteLine ""
@@ -100,15 +102,13 @@ Protected Class MarkdownWriter
 		          line = line + " As " + m.ReturnType
 		        End If
 		        
-		        lines.Append "### `" + line + "`"
-		        lines.Append m.Notes
-		        lines.Append ""
+		        lines.Append "* `" + line + "`"
 		      Next
 		      
 		      If lines.Ubound > -1 Then
 		        tos.WriteLine "## Event Definitions"
-		        tos.WriteLine ""
 		        tos.WriteLine Join(lines, EndOfLine)
+		        tos.WriteLine ""
 		      End If
 		    End If
 		    
@@ -124,8 +124,34 @@ Protected Class MarkdownWriter
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub WriteMethods(sectionTitle As String, meths() As XdocMethod, tos As TextOutputStream)
+	#tag Method, Flags = &h21
+		Private Sub WriteConstants(consts() As XdocConstant, tos As TextOutputStream)
+		  Dim lines() As String
+		  
+		  For i As Integer = 0 To consts.Ubound
+		    Dim c As XdocConstant = consts(i)
+		    
+		    If c.Visibility = XdocProject.kVisibilityPrivate And Not IncludePrivate Then
+		      Continue
+		    End If
+		    
+		    If c.Visibility = XdocProject.kVisibilityProtected And Not IncludeProtected Then
+		      Continue
+		    End If
+		    
+		    lines.Append "* `" + c.Name + " As " + c.Type + " = " + c.Value + "`"
+		  Next
+		  
+		  If lines.Ubound > -1 Then
+		    tos.WriteLine "## Constants"
+		    tos.WriteLine Join(lines, EndOfLine)
+		    tos.WriteLine ""
+		  End If
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub WriteMethods(sectionTitle As String, meths() As XdocMethod, tos As TextOutputStream)
 		  If meths.Ubound > -1 Then
 		    Dim methodLines() As String
 		    
@@ -159,8 +185,8 @@ Protected Class MarkdownWriter
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub WriteProperties(sectionTitle As String, props() As XdocProperty, tos As TextOutputStream)
+	#tag Method, Flags = &h21
+		Private Sub WriteProperties(sectionTitle As String, props() As XdocProperty, tos As TextOutputStream)
 		  If props.Ubound > -1 Then
 		    Dim lines() As String
 		    
