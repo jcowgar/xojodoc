@@ -18,7 +18,18 @@ Inherits ConsoleApplication
 		  mdw.IncludeProtected = options.BooleanValue("include-protected")
 		  mdw.IncludeEvents = options.BooleanValue("include-events")
 		  
-		  mdw.Write(OutputFolder, Project)
+		  Dim fh As FolderItem
+		  Dim asSingle As Boolean
+		  
+		  If Not (OutputFile Is Nil) Then
+		    fh = OutputFile
+		    asSingle = True
+		  Else
+		    fh = OutputFolder
+		    asSingle = False
+		  End If
+		  
+		  mdw.Write(fh, Project, asSingle)
 		End Function
 	#tag EndEvent
 
@@ -29,8 +40,10 @@ Inherits ConsoleApplication
 		  Options.ExtrasRequired = 1
 		  
 		  Dim o As Option
+		  o = New Option("f", "output-file", "Write to a single file", Option.OptionType.File)
+		  Options.AddOption o
+		  
 		  o = New Option("o", "output-directory", "Directory to write files to", Option.OptionType.Directory)
-		  o.IsRequired = True
 		  Options.AddOption o
 		  
 		  o = New Option("", "include-private", "Include items marked private", Option.OptionType.Boolean)
@@ -44,9 +57,23 @@ Inherits ConsoleApplication
 		  
 		  Options.Parse(args)
 		  OutputFolder = Options.FileValue("output-directory")
+		  OutputFile = Options.FileValue("output-file")
 		  
-		  If Not OutputFolder.Exists Then
+		  If OutputFile Is Nil And OutputFolder Is Nil Then
+		    stderr.WriteLine "When writing multiple files (no -s/--single), you must specify -o/--output-directory"
+		    Options.ShowHelp
+		    
+		    Quit 1
+		    
+		  ElseIf Not (OutputFolder Is Nil) Then
 		    OutputFolder.CreateAsFolder
+		    
+		  ElseIf Not (OutputFile Is Nil) Then
+		    If Not OutputFile.IsWriteable Then
+		      stderr.WriteLine "Output file: " + OutputFile.Name + " is not writable"
+		      
+		      Quit 1
+		    End If
 		  End If
 		  
 		  Dim projectFileName As String = Options.Extra(0)
@@ -74,7 +101,6 @@ Inherits ConsoleApplication
 
 
 	#tag Note, Name = TODO
-		* Option to write to a single file
 		* Hyperlink to referenced classes
 		* Have a specific note in the App class named Project, it should be the very first thing written, not part of App class, but as a full project overview
 		* Have a specific note to document Enums and Event Definitions since they can not be documented directly.
@@ -87,6 +113,10 @@ Inherits ConsoleApplication
 
 	#tag Property, Flags = &h21
 		Private Options As OptionParser
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private OutputFile As FolderItem
 	#tag EndProperty
 
 	#tag Property, Flags = &h21

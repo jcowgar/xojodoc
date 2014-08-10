@@ -6,6 +6,10 @@ Protected Class MarkdownWriter
 		  
 		  If f.ParentId = "" Or f.ParentId = "&h0" Then
 		    fullname = f.Name
+		    If root Is Nil Then
+		      Return Nil
+		    End If
+		    
 		    Return root.Child(filename)
 		  End If
 		  
@@ -22,10 +26,13 @@ Protected Class MarkdownWriter
 		  
 		  For i As Integer = parents.Ubound DownTo 0
 		    parentNames.Append parents(i).Name
-		    fh = fh.Child(parents(i).Name)
 		    
-		    If Not fh.Exists Then
-		      fh.CreateAsFolder
+		    If Not (root Is Nil) Then
+		      fh = fh.Child(parents(i).Name)
+		      
+		      If Not fh.Exists Then
+		        fh.CreateAsFolder
+		      End If
 		    End If
 		  Next
 		  
@@ -33,19 +40,32 @@ Protected Class MarkdownWriter
 		  
 		  fullName = Join(parentNames, ".")
 		  
+		  If root Is Nil Then
+		    Return Nil
+		  End If
+		  
 		  Return fh.Child(filename)
 		  
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Write(path As FolderItem, project As XdocProject)
+		Sub Write(path As FolderItem, project As XdocProject, asSingleFile As Boolean = False)
 		  Self.Project = project
+		  
+		  Dim tos As TextOutputStream
+		  
+		  If asSingleFile Then
+		    tos = TextOutputStream.Create(path)
+		  End If
 		  
 		  For Each f As XdocFile In project.Files
 		    Dim fullName As String
-		    Dim fh As FolderItem = GetParent(path, f, fullName)
-		    Dim tos As TextOutputStream = TextOutputStream.Create(fh)
+		    Dim fh As FolderItem = GetParent(If(asSingleFile, Nil, path), f, fullName)
+		    
+		    If Not asSingleFile Then
+		      tos = TextOutputStream.Create(fh)
+		    End If
 		    
 		    tos.WriteLine "# " + f.Type + " " +  fullName
 		    tos.WriteLine ""
@@ -128,7 +148,13 @@ Protected Class MarkdownWriter
 		    WriteMethods("Methods", f.Methods, tos)
 		    WriteProperties("Shared Properties", f.SharedProperties, tos)
 		    WriteMethods("Shared Methods", f.SharedMethods, tos)
+		    
+		    If Not asSingleFile Then
+		      tos.Close
+		    End If
 		  Next
+		  
+		  tos.Close
 		End Sub
 	#tag EndMethod
 
