@@ -10,8 +10,16 @@ Inherits ConsoleApplication
 		  
 		  For fIdx As Integer = 0 To Project.Files.Ubound
 		    Dim file As XdocFile = Project.Files(fIdx)
+		    
+		    For Each exclude As String In ExcludePackages
+		      If file.FullName.InStr(exclude) = 1 Then
+		        Print "  Skipping: " + file.File.Name
+		        Continue For fIdx
+		      End If
+		    Next
+		    
 		    Print "Processing: " + file.File.Name
-		    file.Parse
+		    file.Parse(Flags)
 		    
 		    If Not (OutputFile Is Nil) And file.Name = "App" Then
 		      // Look for a "Project Overview" Note
@@ -27,12 +35,6 @@ Inherits ConsoleApplication
 		    End If
 		  Next
 		  
-		  Dim mdw As New MarkdownWriter
-		  mdw.IncludePrivate = options.BooleanValue("include-private")
-		  mdw.IncludeProtected = options.BooleanValue("include-protected")
-		  mdw.IncludeEvents = options.BooleanValue("include-events")
-		  mdw.ExcludePackages = ExcludePackages
-		  
 		  Dim fh As FolderItem
 		  Dim asSingle As Boolean
 		  
@@ -44,6 +46,7 @@ Inherits ConsoleApplication
 		    asSingle = False
 		  End If
 		  
+		  Dim mdw As New MarkdownWriter
 		  mdw.Write(fh, Project, asSingle)
 		End Function
 	#tag EndEvent
@@ -55,6 +58,10 @@ Inherits ConsoleApplication
 		  Options.ExtrasRequired = 1
 		  
 		  Dim o As Option
+		  
+		  o = New Option("", "flat", "Flatten output directory structure", Option.OptionType.Boolean)
+		  Options.AddOption o
+		  
 		  o = New Option("f", "output-file", "Write to a single file", Option.OptionType.File)
 		  Options.AddOption o
 		  
@@ -102,6 +109,19 @@ Inherits ConsoleApplication
 		  End If
 		  
 		  ExcludePackages = Options.StringValue("exclude-items").Split(",")
+		  FlatOutput = Options.BooleanValue("flat")
+		  
+		  If options.BooleanValue("include-private") Then
+		    Flags = Flags + kIncludePrivate
+		  End If
+		  
+		  If options.BooleanValue("include-protected") Then
+		    Flags = Flags + kIncludeProtected
+		  End If
+		  
+		  If options.BooleanValue("include-events") Then
+		    Flags = Flags + kIncludeEvents
+		  End If
 		End Sub
 	#tag EndMethod
 
@@ -115,11 +135,21 @@ Inherits ConsoleApplication
 	#tag Note, Name = TODO
 		* Hyperlink to referenced classes
 		* Unescape constants, for example "first\x2Clast\X2Cage"
+		* Provide a Flat File Output option (MsOffice.WordParagraph.md instead of MsOffice/WordParagraph.md for example)
+		
 	#tag EndNote
 
 
 	#tag Property, Flags = &h21
 		Private ExcludePackages() As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private Flags As Integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private FlatOutput As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
@@ -141,6 +171,16 @@ Inherits ConsoleApplication
 	#tag Property, Flags = &h21
 		Private ProjectFile As FolderItem
 	#tag EndProperty
+
+
+	#tag Constant, Name = kIncludeEvents, Type = Double, Dynamic = False, Default = \"4", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kIncludePrivate, Type = Double, Dynamic = False, Default = \"1", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kIncludeProtected, Type = Double, Dynamic = False, Default = \"2", Scope = Public
+	#tag EndConstant
 
 
 	#tag ViewBehavior

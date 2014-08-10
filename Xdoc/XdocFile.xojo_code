@@ -66,45 +66,63 @@ Protected Class XdocFile
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Parse()
+		Sub Parse(flags As Integer)
 		  Const kNone = 0
 		  Const kMethod = 1
 		  Const kProperty = 2
 		  Const kEvent = 3
+		  
+		  Dim includePrivate   As Boolean = (1 = Bitwise.BitAnd(App.kIncludePrivate, flags))
+		  Dim includeProtected As Boolean = (1 = Bitwise.BitAnd(App.kIncludeProtected, flags))
+		  Dim includeEvents    As Boolean = (1 = Bitwise.BitAnd(App.kIncludeEvents, flags))
 		  
 		  Dim tis As TextInputStream = TextInputStream.Open(File)
 		  
 		  While Not tis.EOF
 		    Dim line As String = tis.ReadLine.Trim
 		    
-		    If line.Left(4) = "#tag" Then
+		    If line.Instr("#tag") = 1 Then
 		      Dim t As New XdocTag(line)
 		      
 		      Select Case t.TagType
 		      Case "Method"
-		        Dim m As XdocMethod = ParseMethod(tis)
-		        m.Tag = t
+		        Dim o As XdocMethod = ParseMethod(tis)
+		        o.Tag = t
 		        
-		        If m.IsShared Then
-		          SharedMethods.Append m
+		        If (o.Visibility = XdocProject.kVisibilityPrivate And Not includePrivate) Or _
+		          (o.Visibility = XdocProject.kVisibilityProtected And Not includeProtected) _
+		          Then
+		          Continue
+		        End If
+		        
+		        If o.IsShared Then
+		          SharedMethods.Append o
 		        Else
-		          Methods.Append m
+		          Methods.Append o
 		        End If
 		        
 		      Case "Event"
-		        Dim e As XdocMethod = ParseMethod(tis)
-		        e.Tag = t
-		        
-		        Events.Append e
+		        If includeEvents Then
+		          Dim e As XdocMethod = ParseMethod(tis)
+		          e.Tag = t
+		          
+		          Events.Append e
+		        End If
 		        
 		      Case "ComputedProperty", "Property"
-		        Dim p As XdocProperty = ParseProperty(tis)
-		        p.Tag = t
+		        Dim o As XdocProperty = ParseProperty(tis)
+		        o.Tag = t
 		        
-		        If p.IsShared Then
-		          SharedProperties.Append p
+		        If (o.Visibility = XdocProject.kVisibilityPrivate And Not includePrivate) Or _
+		          (o.Visibility = XdocProject.kVisibilityProtected And Not includeProtected) _
+		          Then
+		          Continue
+		        End If
+		        
+		        If o.IsShared Then
+		          SharedProperties.Append o
 		        Else
-		          Properties.Append p
+		          Properties.Append o
 		        End If
 		        
 		      Case "Note"
@@ -122,6 +140,13 @@ Protected Class XdocFile
 		      Case "Enum"
 		        Dim o As XdocEnum = ParseEnum(tis, t.Name)
 		        o.Tag = t
+		        o.Visibility = o.Tag.Visibility
+		        
+		        If (o.Visibility = XdocProject.kVisibilityPrivate And Not includePrivate) Or _
+		          (o.Visibility = XdocProject.kVisibilityProtected And Not includeProtected) _
+		          Then
+		          Continue
+		        End If
 		        
 		        Enums.Append o
 		        
@@ -129,16 +154,22 @@ Protected Class XdocFile
 		        Dim o As XdocConstant = ParseConstant(tis, t)
 		        o.Tag = t
 		        
+		        If (o.Visibility = XdocProject.kVisibilityPrivate And Not includePrivate) Or _
+		          (o.Visibility = XdocProject.kVisibilityProtected And Not includeProtected) _
+		          Then
+		          Continue
+		        End If
+		        
 		        Constants.Append o
 		      End Select
 		    End If
 		  Wend
 		  
 		  For i As Integer = 0 To Notes.Ubound
-		    Dim n As XdocNote = Notes(i)
+		    Dim o As XdocNote = Notes(i)
 		    
-		    If n.Name = "Overview" Then
-		      OverviewNote = n
+		    If o.Name = "Overview" Then
+		      OverviewNote = o
 		      Notes.Remove i
 		      
 		      Exit For i
@@ -156,6 +187,8 @@ Protected Class XdocFile
 		  c.Value = tag.Default
 		  c.Visibility = tag.Visibility
 		  c.Description = tag.Description
+		  
+		  EatTillTagEnd(tis)
 		  
 		  Return c
 		End Function
@@ -343,6 +376,10 @@ Protected Class XdocFile
 
 	#tag Property, Flags = &h0
 		File As FolderItem
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		FullName As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h0

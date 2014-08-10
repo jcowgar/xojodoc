@@ -73,12 +73,42 @@ Protected Class XdocProject
 		      
 		    End Select
 		  Wend
+		  
+		  For Each f As XdocFile In Files
+		    If f.ParentId = "" Or f.ParentId = "&h0" Then
+		      f.FullName = f.Name
+		      Continue
+		    End If
+		    
+		    Dim current As XdocFolder = Folders.Value(f.ParentId)
+		    Dim parents() As XdocFolder
+		    
+		    Do
+		      parents.Append current
+		      current = Folders.Lookup(current.ParentId, Nil)
+		    Loop Until current Is Nil
+		    
+		    Dim parentNames() As String
+		    
+		    For i As Integer = parents.Ubound DownTo 0
+		      parentNames.Append parents(i).Name
+		    Next
+		    
+		    parentNames.Append f.Name
+		    
+		    f.FullName = Join(parentNames, ".")
+		  Next
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		 Shared Function VisibilityFor(text As String) As Integer
 		  Static values() As String = Array("", "Private", "Protected", "Public", "Global")
+		  
+		  If text = "" Then
+		    Return kVisibilityPublic
+		  End If
+		  
 		  Return values.IndexOf(text)
 		End Function
 	#tag EndMethod

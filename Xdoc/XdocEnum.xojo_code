@@ -12,6 +12,10 @@ Protected Class XdocEnum
 		Values() As String
 	#tag EndProperty
 
+	#tag Property, Flags = &h0
+		Visibility As Integer
+	#tag EndProperty
+
 
 	#tag ViewBehavior
 		#tag ViewProperty
