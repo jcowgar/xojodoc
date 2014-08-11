@@ -75,7 +75,7 @@ Protected Class XdocFile
 		  //
 		  // #### Notes:
 		  //
-		  // Current parses Event Definitions, Constants, Properties, Computed Properties, 
+		  // Current parses Event Definitions, Constants, Properties, Computed Properties,
 		  // Methods, Events and Notes. Information is stored such as visibility, shared/instance,
 		  // etc...
 		  //
@@ -444,6 +444,11 @@ Protected Class XdocFile
 
 
 	#tag ViewBehavior
+		#tag ViewProperty
+			Name="FullName"
+			Group="Behavior"
+			Type="String"
+		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Id"
 			Group="Behavior"

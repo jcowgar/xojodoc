@@ -30,7 +30,9 @@ Inherits ConsoleApplication
 		        Dim n As XdocNote = file.Notes(nIdx)
 		        
 		        If n.Name = "Project Overview" Then
+		          n.Name = ProjectFile.Name.Left(ProjectFile.Name.Len - 13)
 		          Project.ProjectNote = n
+		          
 		          file.Notes.Remove nIdx
 		          Exit For nIdx
 		        End If
@@ -49,11 +51,80 @@ Inherits ConsoleApplication
 		    asSingle = False
 		  End If
 		  
-		  Dim mdw As New MarkdownWriter
-		  mdw.Write(fh, Project, asSingle)
+		  Dim writer As BaseWriter = New MarkdownWriter
+		  writer.Project = project
+		  
+		  If asSingle Then
+		    writer.StartNewFile(OutputFile)
+		    
+		    If Not (Project.ProjectNote Is Nil) Then
+		      writer.WriteProjectOverview(Project.ProjectNote)
+		    End If
+		  End If
+		  
+		  Dim files() As XdocFile = Project.Files
+		  Dim fileNames() As String
+		  ReDim fileNames(files.Ubound)
+		  
+		  For fileIdx As Integer = 0 To files.Ubound
+		    fileNames(fileIdx) = files(fileIdx).FullName
+		  Next
+		  
+		  fileNames.SortWith(files)
+		  
+		  For fileIdx As Integer = 0 To files.Ubound
+		    Dim f As XdocFile = files(fileIdx)
+		    
+		    If Not asSingle Then
+		      If FlatOutput Then
+		        writer.StartNewFile(OutputFolder, f.FullName)
+		      Else
+		        Dim rootFh As FolderItem = GetRoot(OutputFolder, f)
+		        writer.StartNewFile(rootFh, f.Name)
+		      End If
+		    End If
+		    
+		    writer.WriteFile(f)
+		    
+		    If Not asSingle Then
+		      writer.EndCurrentFile
+		    End If
+		  Next
+		  
+		  If asSingle Then
+		    writer.EndCurrentFile
+		  End If
 		End Function
 	#tag EndEvent
 
+
+	#tag Method, Flags = &h21
+		Private Function GetRoot(root As FolderItem, f As XdocFile) As FolderItem
+		  If f.ParentId = "" Or f.ParentId = "&h0" Then
+		    Return root
+		  End If
+		  
+		  Dim current As XdocFolder = Project.Folders.Value(f.ParentId)
+		  Dim parents() As XdocFolder
+		  
+		  Do
+		    parents.Append current
+		    current = Project.Folders.Lookup(current.ParentId, Nil)
+		  Loop Until current Is Nil
+		  
+		  Dim fh As FolderItem = root
+		  
+		  For i As Integer = parents.Ubound DownTo 0
+		    fh = fh.Child(parents(i).Name)
+		    
+		    If Not fh.Exists Then
+		      fh.CreateAsFolder
+		    End If
+		  Next
+		  
+		  Return fh
+		End Function
+	#tag EndMethod
 
 	#tag Method, Flags = &h21
 		Private Sub ParseOptions(args() As String)
@@ -130,15 +201,27 @@ Inherits ConsoleApplication
 
 
 	#tag Note, Name = Project Overview
-		xojodoc is an application that will process a Xojo manifest file and create
+		## What is XojoDoc?
+		
+		`xojodoc` is an application that will process a Xojo manifest file and create
 		source level documentation for the project and all included items.
 		
+		## Generating Documentation
+		
+		xojodoc currently only produces Markdown files, however using pandoc, one
+		can convert those Markdown files into a variety of formats.
+		
+		~~~~sh
+		$ xojodoc -f myproject.md myproject.xojo_project
+		$ pandoc myproject.md -o myproject.html -s --toc --toc-depth=2
+		$ pandoc myproject.md -o myproject.docx
+		$ pandoc myproject.md -o myproject.pdf
+		~~~~
 	#tag EndNote
 
 	#tag Note, Name = TODO
 		* Hyperlink to referenced classes
 		* Unescape constants, for example "first\x2Clast\X2Cage"
-		* Provide a Flat File Output option (MsOffice.WordParagraph.md instead of MsOffice/WordParagraph.md for example)
 		
 	#tag EndNote
 
@@ -167,7 +250,7 @@ Inherits ConsoleApplication
 		Private OutputFolder As FolderItem
 	#tag EndProperty
 
-	#tag Property, Flags = &h0, Description = 4D61696E2070726F6A656374207265666572656E6365
+	#tag Property, Flags = &h0, Description = 5265666572656E636520746F206F75722063757272656E742050726F6A65637420746F2070726F6475636520646F63756D656E746174696F6E20666F72
 		Project As XdocProject
 	#tag EndProperty
 
