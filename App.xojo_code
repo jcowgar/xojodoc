@@ -51,7 +51,21 @@ Inherits ConsoleApplication
 		    asSingle = False
 		  End If
 		  
-		  Dim writer As BaseWriter = New MarkdownWriter
+		  Dim writer As BaseWriter
+		  
+		  Select Case OutputFormat
+		  Case "markdown"
+		    writer = New MarkdownWriter
+		    
+		  Case "asciidoc"
+		    writer = New AsciiDocWriter
+		    
+		  Case Else
+		    Print "Unknown format: " + OutputFormat
+		    Print "known formats: markdown, asciidoc"
+		    Quit 1
+		  End Select
+		  
 		  writer.Project = project
 		  
 		  If asSingle Then
@@ -133,6 +147,9 @@ Inherits ConsoleApplication
 		  
 		  Dim o As Option
 		  
+		  o = New Option("", "output-format", "Format of the output, default: markdown, others: asciidoc")
+		  Options.AddOption o
+		  
 		  o = New Option("", "flat", "Flatten output directory structure", Option.OptionType.Boolean)
 		  Options.AddOption o
 		  
@@ -175,6 +192,11 @@ Inherits ConsoleApplication
 		    End If
 		  End If
 		  
+		  #Pragma Warning "How is this affecting all of our other applications, i.e. a symlink"
+		  If Options.Extra(0) = "xojodoc" Then
+		    Options.Extra.Remove 0
+		  End If
+		  
 		  Dim projectFileName As String = Options.Extra(0)
 		  ProjectFile = GetRelativeFolderItem(projectFileName)
 		  If ProjectFile Is Nil Or Not ProjectFile.IsReadable Then
@@ -196,6 +218,9 @@ Inherits ConsoleApplication
 		  If options.BooleanValue("include-events") Then
 		    Flags = Flags + kIncludeEvents
 		  End If
+		  
+		  OutputFormat = options.StringValue("output-format", "markdown")
+		  
 		End Sub
 	#tag EndMethod
 
@@ -248,6 +273,10 @@ Inherits ConsoleApplication
 
 	#tag Property, Flags = &h21
 		Private OutputFolder As FolderItem
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private OutputFormat As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h0, Description = 5265666572656E636520746F206F75722063757272656E742050726F6A65637420746F2070726F6475636520646F63756D656E746174696F6E20666F72
