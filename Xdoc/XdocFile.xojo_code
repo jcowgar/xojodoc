@@ -283,7 +283,9 @@ Protected Class XdocFile
 		  
 		  meth.Notes = Join(notes, EndOfLine)
 		  
-		  EatTillTagEnd(tis)
+		  If line.Trim.InStr("#tag End") <> 1 Then
+		    EatTillTagEnd(tis)
+		  End If
 		  
 		  Return meth
 		End Function
@@ -448,6 +450,7 @@ Protected Class XdocFile
 			Name="FullName"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Id"
