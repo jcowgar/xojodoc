@@ -58,7 +58,7 @@ Inherits BaseWriter
 
 	#tag Method, Flags = &h0
 		Sub WriteFile(xFile As XdocFile)
-		  Tos.WriteLine "# " + xFile.Type + " " +  xFile.FullName + "{#" + IdString(xFile.FullName) + "}"
+		  Tos.WriteLine "# " + xFile.Type + " " +  xFile.FullName + " {#" + IdString(xFile.FullName) + "}"
 		  Tos.WriteLine ""
 		  
 		  If Not (xFile.OverviewNote Is Nil) Then
