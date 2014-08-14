@@ -8,7 +8,7 @@ Inherits BaseWriter
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function IdString(ParamArray values() As String) As String
+		Private Function IdString(values() As String) As String
 		  Dim v() As String
 		  
 		  For i As Integer = 0 To values.Ubound
@@ -35,17 +35,38 @@ Inherits BaseWriter
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
+		Private Sub WriteAnchor(ParamArray names() As String)
+		  If Not (CurrentFile Is Nil) Then
+		    names.Insert 0, CurrentFile.FullName
+		  End If
+		  
+		  Tos.WriteLine "[[" + IdString(names) + "]]"
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
 		Private Sub WriteConstants(f As XdocFile)
 		  If f.Constants.Ubound = -1 Then
 		    Return
 		  End If
 		  
+		  Dim hasRelatedNote As Boolean
+		  
+		  For Each n As XdocNote In CurrentFile.Notes
+		    If n.Name = "Constants" Then
+		      Return
+		    End If
+		  Next
+		  
+		  
+		  WriteAnchor "Constants"
 		  Tos.WriteLine "=== Constants"
 		  
 		  For i As Integer = 0 To f.Constants.Ubound
 		    Dim c As XdocConstant = f.Constants(i)
 		    
-		    Tos.WriteLine "==== " + c.Name + " As " + c.Type + " = " + c.Value
+		    WriteAnchor c.Name
+		    Tos.WriteLine "==== +" + c.Name + " As " + c.Type + " = " + c.Value + "+"
 		    If c.Tag.Description <> "" Then
 		      Tos.WriteLine c.Tag.Description
 		    End If
@@ -58,11 +79,13 @@ Inherits BaseWriter
 
 	#tag Method, Flags = &h0
 		Sub WriteFile(xFile As XdocFile)
+		  CurrentFile = xFile
+		  
+		  WriteAnchor
 		  Tos.WriteLine "== " + xFile.Type + " " +  xFile.FullName
 		  Tos.WriteLine ""
 		  
 		  If Not (xFile.OverviewNote Is Nil) Then
-		    Tos.WriteLine "=== Overview"
 		    Tos.WriteLine xFile.OverviewNote.Text
 		    Tos.WriteLine ""
 		  End If
@@ -71,6 +94,7 @@ Inherits BaseWriter
 		  
 		  If notes.Ubound > -1 Then
 		    For i As Integer = 0 To notes.Ubound
+		      WriteAnchor notes(i).Name
 		      Tos.WriteLine "=== " + notes(i).Name
 		      Tos.WriteLine notes(i).Text
 		      Tos.WriteLine ""
@@ -80,44 +104,70 @@ Inherits BaseWriter
 		  WriteConstants(xFile)
 		  
 		  If xFile.Enums.Ubound > -1 Then
-		    Tos.WriteLine "=== Enums"
-		    Tos.WriteLine ""
+		    Dim hasRelatedNote As Boolean
 		    
-		    For i As Integer = 0 To xFile.Enums.Ubound
-		      Dim e As XdocEnum = xFile.Enums(i)
-		      
-		      Tos.WriteLine "==== " + e.Name
-		      If e.Tag.Description <> "" Then
-		        Tos.WriteLine e.Tag.Description
-		        Tos.WriteLine ""
+		    For Each n As XdocNote In xFile.Notes
+		      If n.Name = "Enums" Then
+		        hasRelatedNote = True
+		        Exit
 		      End If
-		      
-		      Tos.WriteLine "===== Values"
-		      For j As Integer = 0 To e.Values.Ubound
-		        Tos.WriteLine "* `" + e.Values(j) + "`"
-		      Next
-		      
-		      Tos.WriteLine ""
 		    Next
+		    
+		    If Not hasRelatedNote Then
+		      WriteAnchor "Enums"
+		      Tos.WriteLine "=== Enums"
+		      Tos.WriteLine ""
+		      
+		      For i As Integer = 0 To xFile.Enums.Ubound
+		        Dim e As XdocEnum = xFile.Enums(i)
+		        
+		        WriteAnchor e.Name
+		        Tos.WriteLine "==== +" + e.Name + "+"
+		        If e.Tag.Description <> "" Then
+		          Tos.WriteLine e.Tag.Description
+		          Tos.WriteLine ""
+		        End If
+		        
+		        Tos.WriteLine "===== Values"
+		        For j As Integer = 0 To e.Values.Ubound
+		          Tos.WriteLine "* +" + e.Values(j) + "+"
+		        Next
+		        
+		        Tos.WriteLine ""
+		      Next
+		    End If
 		  End If
 		  
 		  If xFile.EventDefinitions.Ubound > -1 Then
-		    Tos.WriteLine "=== Event Definitions"
-		    Tos.WriteLine ""
+		    Dim hasRelatedNote As Boolean
 		    
-		    For Each m As XdocMethod In xFile.EventDefinitions
-		      Dim line As String = m.Name + "(" + Join(m.Parameters, ", ") + ")"
-		      If m.ReturnType <> "" Then
-		        line = line + " As " + m.ReturnType
+		    For Each n As XdocNote In xFile.Notes
+		      If n.Name = "Event Definitions" Then
+		        hasRelatedNote = True
+		        Exit
 		      End If
-		      
-		      Tos.WriteLine "==== " + line
-		      If m.Tag.Description <> "" Then
-		        Tos.WriteLine m.Tag.Description
-		      End If
-		      
-		      Tos.WriteLine ""
 		    Next
+		    
+		    If Not hasRelatedNote Then
+		      WriteAnchor "Event Definitions"
+		      Tos.WriteLine "=== Event Definitions"
+		      Tos.WriteLine ""
+		      
+		      For Each m As XdocMethod In xFile.EventDefinitions
+		        Dim line As String = m.Name + "(" + Join(m.Parameters, ", ") + ")"
+		        If m.ReturnType <> "" Then
+		          line = line + " As " + m.ReturnType
+		        End If
+		        
+		        WriteAnchor m.Name
+		        Tos.WriteLine "==== +" + line + "+"
+		        If m.Tag.Description <> "" Then
+		          Tos.WriteLine m.Tag.Description
+		        End If
+		        
+		        Tos.WriteLine ""
+		      Next
+		    End If
 		  End If
 		  
 		  WriteMethods("Events", xFile, xFile.Events)
@@ -134,6 +184,7 @@ Inherits BaseWriter
 		    Return
 		  End If
 		  
+		  WriteAnchor sectionTitle
 		  Tos.WriteLine "=== " + sectionTitle
 		  Tos.WriteLine ""
 		  
@@ -146,7 +197,8 @@ Inherits BaseWriter
 		        methodLine = methodLine + " As " + m.ReturnType
 		      End If
 		      
-		      Tos.WriteLine "==== " + methodLine
+		      WriteAnchor m.Name
+		      Tos.WriteLine "==== +" + methodLine + "+"
 		      If m.Tag.Description <> "" Then
 		        Tos.WriteLine m.Tag.Description
 		        Tos.WriteLine ""
@@ -176,6 +228,7 @@ Inherits BaseWriter
 		    Return
 		  End If
 		  
+		  WriteAnchor sectionTitle
 		  Tos.WriteLine "=== " + sectionTitle
 		  Tos.WriteLine ""
 		  
@@ -183,7 +236,8 @@ Inherits BaseWriter
 		    For i As Integer = 0 To props.Ubound
 		      Dim p As XdocProperty = props(i)
 		      
-		      Tos.WriteLine "==== " + p.Declaration
+		      WriteAnchor p.Name
+		      Tos.WriteLine "==== +" + p.Declaration + "+"
 		      Tos.WriteLine ""
 		      
 		      If p.Tag.Description <> "" Then
@@ -201,6 +255,10 @@ Inherits BaseWriter
 		End Sub
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h21
+		Private CurrentFile As XdocFile
+	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private Tos As TextOutputStream
