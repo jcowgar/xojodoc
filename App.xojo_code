@@ -11,9 +11,18 @@ Inherits ConsoleApplication
 		  For fIdx As Integer = Project.Files.Ubound DownTo 0
 		    Dim file As XdocFile = Project.Files(fIdx)
 		    
+		    If IncludePackages.Ubound > -1 Then
+		      For Each include As String In IncludePackages
+		        If file.FullName.InStr(include) <> 1 Then
+		          Print "  Skipping, not on include list: " + file.FullName
+		          Project.Files.Remove fIdx
+		        End If
+		      Next
+		    End If
+		    
 		    For Each exclude As String In ExcludePackages
 		      If file.FullName.InStr(exclude) = 1 Then
-		        Print "  Skipping: " + file.FullName
+		        Print "      Skipping, on exclude list: " + file.FullName
 		        Project.Files.Remove fIdx
 		      End If
 		    Next
@@ -168,7 +177,10 @@ Inherits ConsoleApplication
 		  o = New Option("", "include-events", "Include implemented events", Option.OptionType.Boolean)
 		  Options.AddOption o
 		  
-		  o = New Option("e", "exclude-items", "Exclude items beginning with Full Name of")
+		  o = New Option("e", "exclude", "Exclude items beginning with Full Name of")
+		  Options.AddOption o
+		  
+		  o = New Option("i", "include", "Include items beginning with Full Name of")
 		  Options.AddOption o
 		  
 		  Options.Parse(args)
@@ -204,7 +216,8 @@ Inherits ConsoleApplication
 		    Quit 1
 		  End If
 		  
-		  ExcludePackages = Options.StringValue("exclude-items").Split(",")
+		  ExcludePackages = Options.StringValue("exclude").Split(",")
+		  IncludePackages = Options.StringValue("include").Split(",")
 		  FlatOutput = Options.BooleanValue("flat")
 		  
 		  If options.BooleanValue("include-private") Then
@@ -261,6 +274,10 @@ Inherits ConsoleApplication
 
 	#tag Property, Flags = &h21
 		Private FlatOutput As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private IncludePackages() As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
