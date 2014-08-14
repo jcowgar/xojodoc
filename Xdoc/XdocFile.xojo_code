@@ -259,7 +259,10 @@ Protected Class XdocFile
 		      line = line.Mid(2).Trim
 		      
 		    ElseIf line.Left(2) = "//" Then
-		      line = line.Mid(3).Trim
+		      line = line.Mid(3).RTrim
+		      If line.Left(1) = " " Then
+		        line = line.Mid(2)
+		      End If
 		      
 		    Else
 		      // We are no longer in a comment
@@ -296,6 +299,7 @@ Protected Class XdocFile
 		  Dim note As New XdocNote
 		  note.Name = name
 		  
+		  Dim removeCount As Integer = -1
 		  Dim lines() As String
 		  
 		  While Not tis.EOF
@@ -304,14 +308,28 @@ Protected Class XdocFile
 		    // This will strip leading spaces, even in the note, some of which
 		    // could be indentation important to formatting.
 		    
-		    Dim line As String = tis.ReadLine.Trim
+		    Dim line As String = tis.ReadLine
+		    If removeCount = -1 Then
+		      Static spaceRx As RegEx
+		      If spaceRx Is Nil Then
+		        spaceRx = New RegEx
+		        spaceRx.SearchPattern = "^\s*"
+		      End If
+		      
+		      Dim match As RegExMatch = spaceRx.Search(line)
+		      removeCount = match.SubExpressionString(0).Len
+		    End If
 		    
-		    If line = "#tag EndNote" Then
+		    If line.Trim = "#tag EndNote" Then
 		      Exit
 		    End If
 		    
 		    lines.Append line
 		  Wend
+		  
+		  For i As Integer = 0 To lines.Ubound
+		    lines(i) = lines(i).Mid(removeCount + 1)
+		  Next
 		  
 		  note.Text = Join(lines, EndOfLine)
 		  
