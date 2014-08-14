@@ -54,7 +54,7 @@ MDICaption=
 DefaultEncoding=&h0
 AppIcon=xojodoc.xojo_resources;&h0
 OSXBundleID=com.cowgar.xojodoc
-DebuggerCommandLine=--output-format asciidoc -f ~/Desktop/dragonc.adoc ~/Projects/AMPS/dragon/dragonc/dragonc.xojo_project
+DebuggerCommandLine=--include=Atc --output-format asciidoc -f ~/Projects/Xojo/atc/atc.adoc ~/Projects/Xojo/atc/atc.xojo_project
 UseGDIPlus=False
 UseBuildsFolder=True
 IsWebProject=False
