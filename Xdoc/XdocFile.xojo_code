@@ -67,24 +67,21 @@ Protected Class XdocFile
 
 	#tag Method, Flags = &h0, Description = 50617273652074686520636F6E74656E7473206F66207468652066696C6520706F70756C6174696E67206974732070726F70657274696573
 		Sub Parse(flags As Integer)
-		  // #### Parameters:
+		  // .Parameters
+		  // * `flags` - Bit flags regarding what to include or not, see +<<App.kIncludeEvents,App.kIncludeEvents>>+,
+		  //   +<<App.kIncludePrivate,App.kIncludePrivate>>+,
+		  //   +<<App.kIncludeProtected,App.kIncludeProtected>>+
 		  //
-		  // * `flags` - Bit flags regarding what to include or not, see [App.kIncludeEvents](#App.kIncludeEvents),
-		  //   [App.kIncludePrivate](#App.kIncludePrivate),
-		  //   [App.kIncludeProtected](#App.kIncludeProtected)
-		  //
-		  // #### Notes:
-		  //
+		  // .Notes
 		  // Current parses Event Definitions, Constants, Properties, Computed Properties,
 		  // Methods, Events and Notes. Information is stored such as visibility, shared/instance,
 		  // etc...
 		  //
-		  // Events, Event Definitions and Methods are all parsed as a [Xdoc.XdocMethod]. All other
+		  // Events, Event Definitions and Methods are all parsed as a +<<Xdoc.XdocMethod,Xdoc.XdocMethod>>+. All other
 		  // items have specific classes to represent the parsed data.
 		  //
-		  // #### See Also:
-		  //
-		  // [Xdoc.XdocConstant], [Xdoc.XdocProperty], [Xdoc.XdocMethod] and [Xdoc.XdocNote].
+		  // .See Also:
+		  // +<<Xdoc.XdocConstant>>+, +<<Xdoc.XdocProperty>>+, +<<Xdoc.XdocMethod>>+ and +<<Xdoc.XdocNote>>+.
 		  //
 		  
 		  Const kNone = 0

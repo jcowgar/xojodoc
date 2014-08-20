@@ -106,18 +106,18 @@ Protected Class XdocProject
 		  //
 		  // Takes `""`, `"Private"`, `"Protected"`, `"Public"`, `"Global"` and will return one of:
 		  //
-		  // * [kVisibilityNone](#Xdoc.XdocProject.kVisibilityNone)
-		  // * [kVisibilityPrivate](#Xdoc.XdocProject.kVisibilityPrivate)
-		  // * [kVisibilityProtected](#Xdoc.XdocProject.kVisibilityProtected)
-		  // * [kVisibilityPublic](#Xdoc.XdocProject.kVisibilityPublic)
-		  // * [kVisibilityGlobal](#Xdoc.XdocProject.kVisibilityGlobal)
+		  // * +<<Xdoc.XdocProject.kVisibilityNone,kVisibilityNone>>+
+		  // * +<<Xdoc.XdocProject.kVisibilityPrivate,kVisibilityPrivate>>+
+		  // * +<<Xdoc.XdocProject.kVisibilityProtected,kVisibilityProtected>>+
+		  // * +<<Xdoc.XdocProject.kVisibilityPublic,kVisibilityPublic>>+
+		  // * +<<Xdoc.XdocProject.kVisibilityGlobal,kVisibilityGlobal>>+
 		  //
-		  // #### Example:
-		  //
-		  // ~~~~vb.net
+		  // .Example
+		  // [source,vbnet]
+		  // ----
 		  // Dim visibility As Integer = XdocProject.VisibilityFor("Public")
 		  // ' Visibility = kVisibilityPublic
-		  // ~~~~
+		  // ----
 		  
 		  Static values() As String = Array("", "Private", "Protected", "Public", "Global")
 		  

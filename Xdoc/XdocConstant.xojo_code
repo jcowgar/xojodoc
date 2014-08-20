@@ -1,7 +1,7 @@
 #tag Class
 Protected Class XdocConstant
 	#tag Note, Name = Overview
-		Represent a Constant found in an [Xdoc.XdocFile].
+		Represent a Constant found in an +<<Xdoc.XdocFile>>+.
 		
 	#tag EndNote
 
@@ -36,6 +36,7 @@ Protected Class XdocConstant
 			Name="Description"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
@@ -74,11 +75,13 @@ Protected Class XdocConstant
 			Name="Type"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Value"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Visibility"

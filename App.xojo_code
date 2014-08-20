@@ -239,26 +239,82 @@ Inherits ConsoleApplication
 
 
 	#tag Note, Name = Project Overview
-		## What is XojoDoc?
+		WARNING: `xojodoc` is in its infancy. Just about everything is liable to change.
+		`xojodoc` needs early adopters to help solidify the application and
+		process. Thanks!
+		
+		=== What is XojoDoc?
 		
 		`xojodoc` is an application that will process a Xojo manifest file and create
 		source level documentation for the project and all included items.
 		
-		## Generating Documentation
+		=== Generating Documentation
 		
-		xojodoc currently only produces Markdown files, however using pandoc, one
-		can convert those Markdown files into a variety of formats.
+		`xojodoc` currently produces AsciiDoc or Markdown files.
 		
-		~~~~sh
-		$ xojodoc -f myproject.md myproject.xojo_project
+		* AsciiDoc produces nice manuals, books. It can generate html, xhtml,
+		  docbook and LaTeX files.
+		* AsciiDoc is much more capable.
+		* Markdown is a little more known, with pandoc one can generate a variety
+		  of files such as HTML, PDF and Microsoft Word.
+		* Markdown is simpler.
+		
+		.Examples of AsciiDoc to HTML
+		----
+		$ xojodoc -f myproject.adoc myproject.xojo_project
+		$ asciidoc -a toc -a toclevels=2 -a icons -a source-highlighter=pygments myproject.adoc
+		----
+		
+		.Examples of Markdown converting to HTML, Word and PDF
+		----
+		$ xojodoc --output-format=markdown -f myproject.md myproject.xojo_project
 		$ pandoc myproject.md -o myproject.html -s --toc --toc-depth=2
 		$ pandoc myproject.md -o myproject.docx
 		$ pandoc myproject.md -o myproject.pdf
-		~~~~
+		----
+		
+		Documenting Your Code
+		---------------------
+		
+		For all element types, you can add a description via the Inspector/Gear "Description"
+		field. This, however, is currently limited to a single line description (see feature
+		request #34943).
+		
+		If you want to provide more documentation you can in various ways.
+		
+		To document a method, simply include (starting on the first line) a comment. Everything
+		in the first comment will be included as documentation. `xojodoc` stops processing the
+		method once the first non-comment line is encountered.
+		
+		.Example
+		[source,vbnet]
+		----
+		Function SayHello(name As String) As Integer
+		  ' Say hello to someone.
+		  '
+		  ' .Parameters
+		  ' * +name+: person to say hello to
+		  '
+		  ' .Returns
+		  ' +1+ if the person nice and said hello back, +0+ if the person was mean
+		  ' and ignored us.
+		
+		  Print "Hello, " + name
+		
+		  ' This comment is not included in the source doc output
+		
+		  Return 1
+		End Function
+		----
+		
+		To document a property, simply type in the editor when the property is selected.
+		
+		To document constants, create a Note in the Module/Class named "Constants". This
+		note will be output *instead of* the parsed constant code.
+		
 	#tag EndNote
 
 	#tag Note, Name = TODO
-		* Hyperlink to referenced classes
 		* Unescape constants, for example "first\x2Clast\X2Cage"
 		
 	#tag EndNote
