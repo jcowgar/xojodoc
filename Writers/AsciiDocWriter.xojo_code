@@ -21,6 +21,20 @@ Inherits BaseWriter
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function IdString(ParamArray  values() As String) As String
+		  Dim v() As String
+		  
+		  For i As Integer = 0 To values.Ubound
+		    Dim value As String = values(i)
+		    
+		    v.Append value.ReplaceAll(" ", "").ReplaceAll("(", "").ReplaceAll(")", "")
+		  Next
+		  
+		  Return Join(v, ".")
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub StartNewFile(basePath As FolderItem, baseName As String = "")
 		  If baseName <> "" Then
@@ -89,6 +103,8 @@ Inherits BaseWriter
 		    Tos.WriteLine xFile.OverviewNote.Text
 		    Tos.WriteLine ""
 		  End If
+		  
+		  WriteToc(xFile)
 		  
 		  Dim notes() As XdocNote = xFile.Notes
 		  
@@ -252,6 +268,87 @@ Inherits BaseWriter
 		    Next
 		  End If
 		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub WriteToc(xFile As XdocFile)
+		  If xFile.EventDefinitions.Ubound + xFile.Properties.Ubound + xFile.Methods.Ubound = -3 Then
+		    Return
+		  End If
+		  
+		  Tos.WriteLine "=== Contents"
+		  Tos.WriteLine ""
+		  
+		  Dim names() As String
+		  
+		  ReDim names(-1)
+		  For i As Integer = 0 To xFile.EventDefinitions.Ubound
+		    names.Append xFile.EventDefinitions(i).Name
+		  Next
+		  WriteToc(xFile, "Events", names)
+		  
+		  ReDim names(-1)
+		  For i As Integer = 0 To xFile.Properties.Ubound
+		    names.Append xFile.Properties(i).Name
+		  Next
+		  WriteToc(xFile, "Properties", names)
+		  
+		  ReDim names(-1)
+		  For i As Integer = 0 To xFile.Methods.Ubound
+		    names.Append xFile.Methods(i).Name
+		  Next
+		  WriteToc(xFile, "Methods", names)
+		  
+		  ReDim names(-1)
+		  For i As Integer = 0 To xFile.SharedProperties.Ubound
+		    names.Append xFile.SharedProperties(i).Name
+		  Next
+		  WriteToc(xFile, "Shared Properties", names)
+		  
+		  ReDim names(-1)
+		  For i As Integer = 0 To xFile.SharedMethods.Ubound
+		    names.Append xFile.SharedMethods(i).Name
+		  Next
+		  WriteToc(xFile, "Shared Methods", names)
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub WriteToc(xFile As XdocFile, title As String, names() As String)
+		  Dim i As Integer = 1
+		  
+		  While i <= names.Ubound
+		    If names(i - 1) = names(i) Then
+		      names.Remove i
+		    Else
+		      i = i + 1
+		    End If
+		  Wend
+		  
+		  If names.Ubound > -1 Then
+		    'Tos.WriteLine "==== " + title
+		    Tos.WriteLine "." + title
+		    Tos.WriteLine "****"
+		    Tos.WriteLine "[grid=""none"",frame=""none""]"
+		    Tos.WriteLine "|==================================="
+		    
+		    For i = 0 To names.Ubound
+		      If i > 0 And i Mod 3 = 0 Then
+		        Tos.WriteLine ""
+		      End If
+		      
+		      Tos.Write "|+<<" + IdString(xFile.FullName, names(i)) + "," + names(i) + ">>+"
+		    Next
+		    For i = ((names.Ubound + 1) Mod 3) To 2
+		      Tos.Write "|"
+		    Next
+		    Tos.WriteLine ""
+		    Tos.WriteLine "|==================================="
+		    Tos.WriteLine "****"
+		    Tos.WriteLine ""
+		  End If
 		End Sub
 	#tag EndMethod
 
