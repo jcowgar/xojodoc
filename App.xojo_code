@@ -156,7 +156,7 @@ Inherits ConsoleApplication
 		  
 		  Dim o As Option
 		  
-		  o = New Option("", "output-format", "Format of the output, default: markdown, others: asciidoc")
+		  o = New Option("", "output-format", "Format of the output, default: asciidoc, others: markdown")
 		  Options.AddOption o
 		  
 		  o = New Option("", "flat", "Flatten output directory structure", Option.OptionType.Boolean)
@@ -232,7 +232,7 @@ Inherits ConsoleApplication
 		    Flags = Flags + kIncludeEvents
 		  End If
 		  
-		  OutputFormat = options.StringValue("output-format", "markdown")
+		  OutputFormat = options.StringValue("output-format", "asciidoc")
 		  
 		End Sub
 	#tag EndMethod
