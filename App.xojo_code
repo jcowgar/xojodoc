@@ -311,9 +311,6 @@ Inherits ConsoleApplication
 		
 		To document constants, create a Note in the Module/Class named "Constants". This
 		note will be output *instead of* the parsed constant code.
-		
-		Hi Jeremy!
-		
 	#tag EndNote
 
 	#tag Note, Name = TODO
