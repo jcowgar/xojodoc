@@ -361,6 +361,15 @@ Inherits ConsoleApplication
 	#tag EndProperty
 
 
+	#tag Constant, Name = BuildDateString, Type = String, Dynamic = False, Default = \"unknown", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = BuildNumber, Type = Double, Dynamic = False, Default = \"1", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = GitRevision, Type = String, Dynamic = False, Default = \"unknown", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = kIncludeEvents, Type = Double, Dynamic = False, Default = \"4", Scope = Public, Description = 42697420666F7220466C61677320746F20696E6469636174652063616C6C65722077616E747320746F20696E636C756465204576656E747320696E2074686520646F63756D656E746174696F6E
 	#tag EndConstant
 
@@ -368,6 +377,9 @@ Inherits ConsoleApplication
 	#tag EndConstant
 
 	#tag Constant, Name = kIncludeProtected, Type = Double, Dynamic = False, Default = \"2", Scope = Public, Description = 42697420666F7220466C61677320746F20696E6469636174652063616C6C65722077616E747320746F20696E636C7564652050726F746563746564206D656D6265727320696E2074686520646F63756D656E746174696F6E
+	#tag EndConstant
+
+	#tag Constant, Name = ProductName, Type = String, Dynamic = False, Default = \"xojodoc", Scope = Public
 	#tag EndConstant
 
 
