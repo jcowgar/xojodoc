@@ -415,6 +415,10 @@ Protected Class OptionParser
 		  
 		  Dim helpFor As String = AppName
 		  If helpFor <> "" Then
+		    If App.ShortVersion <> "" Then
+		      helpFor = helpFor + " version " + App.ShortVersion
+		    End If
+		    
 		    If AppDescription <> "" Then
 		      helpFor = kIndentPrefix + helpFor + " - " + AppDescription
 		    End If
