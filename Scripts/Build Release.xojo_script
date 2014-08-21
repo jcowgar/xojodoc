@@ -50,9 +50,9 @@ ConstantValue("App.BuildDateString") = Now
 
 Dim appPath As String
 
-'appPath = BuildApp(3)
-'appPath = BuildApp(4)
-'appPath = BuildApp(6)
+appPath = BuildApp(3)
+appPath = BuildApp(4)
+appPath = BuildApp(6)
 
 If IsBuildPlatformUnixish Then
 Dim rev As String = DotDate(Now) + "." + BuildNumber
