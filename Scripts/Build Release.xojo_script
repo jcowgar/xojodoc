@@ -3,12 +3,22 @@
 // and also looks at the current git revision.
 //
 
+Function DotDate(value As String) As String
+Dim parts() As String = value.Split("/")
+Return parts(2) + "." + parts(0) + "." + parts(1)
+End Function
+
+Dim IsBuildPlatformUnixish As Boolean
 Dim GitRev As String = Trim(DoShellCommand("git --git-dir=""$PROJECT_PATH/.git"" rev-parse HEAD"))
 Dim Now As String = Trim(DoShellCommand("date"))
 
 If Len(Now) = 14 Then
+IsBuildPlatformUnixish = False
+
 Now = Now.Right(10)
 Else
+IsBuildPlatformUnixish = True
+
 Now = Trim(DoShellCommand("date +%m/%d/%Y"))
 End If
 
@@ -40,6 +50,15 @@ ConstantValue("App.BuildDateString") = Now
 
 Dim appPath As String
 
-appPath = BuildApp(3)
-appPath = BuildApp(4)
-appPath = BuildApp(7)
+'appPath = BuildApp(3)
+'appPath = BuildApp(4)
+'appPath = BuildApp(6)
+
+If IsBuildPlatformUnixish Then
+Dim rev As String = DotDate(Now) + "." + BuildNumber
+
+Call DoShellCommand("mkdir -f ""$PROJECT_PATH/dist""")
+Call DoShellCommand("cd ""$PROJECT_PATH/Builds - xojodoc.xojo_project/Linux"" && tar czf ""$PROJECT_PATH/dist/xojodoc-linux-" + rev + ".tar.gz"" xojodoc")
+Call DoShellCommand("cd ""$PROJECT_PATH/Builds - xojodoc.xojo_project/Mac OS X (Intel)"" && zip -r ""$PROJECT_PATH/dist/xojodoc-osx-" + rev + ".zip"" xojodoc")
+Call DoShellCommand("cd ""$PROJECT_PATH/Builds - xojodoc.xojo_project/Windows"" && zip -r ""$PROJECT_PATH/dist/xojodoc-windows-" + rev + ".zip"" xojodoc")
+End If
