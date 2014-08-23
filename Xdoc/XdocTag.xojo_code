@@ -1,6 +1,12 @@
 #tag Class
 Protected Class XdocTag
 	#tag Method, Flags = &h0
+		Sub Constructor()
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Constructor(raw As String)
 		  Dim parts() As String = raw.Split(", ")
 		  
@@ -37,16 +43,6 @@ Protected Class XdocTag
 		    Case "Description"
 		      Description = kv(1)
 		      Description = DecodeHex(Description)
-		      
-		      'Dim dLen As Integer = Description.Len
-		      'Dim chrs() As String
-		      '
-		      'For chrIdx As Integer = 1 To dLen Step 2
-		      'Dim chCode As Integer = Val(Description.Mid(chrIdx, 2))
-		      'chrs.Append Chr(chCode)
-		      'Next
-		      '
-		      'Description = Join(chrs, "")
 		    End Select
 		  Next
 		  
@@ -95,16 +91,19 @@ Protected Class XdocTag
 			Name="Default"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Description"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Flags"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
@@ -141,6 +140,7 @@ Protected Class XdocTag
 			Name="TagType"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Top"
@@ -153,6 +153,7 @@ Protected Class XdocTag
 			Name="Type"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Visibility"
