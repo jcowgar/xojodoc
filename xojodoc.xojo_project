@@ -28,6 +28,7 @@ Class=MarkdownWriter;Writers/MarkdownWriter.xojo_code;&h6726CE95;&h642778EF;fals
 Folder=Helpers;Helpers;&h5B7507ED;&h0;false
 Module=FolderItemHelpers;Helpers/FolderItemHelpers.xojo_code;&h787C96C0;&h5B7507ED;false
 Folder=OptionParser;Helpers/OptionParser;&h64914B92;&h5B7507ED;false
+Module=XmlHelpers;Helpers/XmlHelpers.xojo_code;&h1377AF67;&h5B7507ED;false
 MajorVersion=1
 MinorVersion=0
 SubVersion=0
@@ -54,7 +55,7 @@ MDICaption=
 DefaultEncoding=&h0
 AppIcon=xojodoc.xojo_resources;&h0
 OSXBundleID=com.cowgar.xojodoc
-DebuggerCommandLine=--include=Atc --output-format asciidoc -f ~/Projects/Xojo/atc/atc.adoc ~/Projects/Xojo/atc/atc.xojo_project
+DebuggerCommandLine=-i JSONItem_MTC --output-format asciidoc -f ~/Projects/Xojo/JSONItem_MTC/docs.adoc ~/Projects/Xojo/JSONItem_MTC/app/app.xojo_project
 UseGDIPlus=False
 UseBuildsFolder=True
 IsWebProject=False

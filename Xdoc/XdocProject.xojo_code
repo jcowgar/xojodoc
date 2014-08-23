@@ -41,7 +41,7 @@ Protected Class XdocProject
 		    
 		    Select Case partType
 		    Case "Class", "Interface", "Module"
-		      If values(1).Right(10) = ".xojo_code" Then
+		      If values(1).Right(10) = ".xojo_code" Or values(1).Right(14) = ".xojo_xml_code" Then
 		        Dim fh As FolderItem = GetRelativeFolderItem(values(1), File.Parent)
 		        
 		        Dim f As New XdocFile(values(0), fh)

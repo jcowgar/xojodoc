@@ -84,14 +84,35 @@ Protected Class XdocFile
 		  // +<<Xdoc.XdocConstant>>+, +<<Xdoc.XdocProperty>>+, +<<Xdoc.XdocMethod>>+ and +<<Xdoc.XdocNote>>+.
 		  //
 		  
+		  IncludePrivate = (1 = Bitwise.BitAnd(App.kIncludePrivate, flags))
+		  IncludeProtected = (1 = Bitwise.BitAnd(App.kIncludeProtected, flags))
+		  IncludeEvents = (1 = Bitwise.BitAnd(App.kIncludeEvents, flags))
+		  
+		  If File.Name.Right(13) = "xojo_xml_code" Then
+		    ParseXml
+		  Else
+		    ParseCode
+		  End If
+		  
+		  For i As Integer = 0 To Notes.Ubound
+		    Dim o As XdocNote = Notes(i)
+		    
+		    If o.Name = "Overview" Then
+		      OverviewNote = o
+		      Notes.Remove i
+		      
+		      Exit For i
+		    End If
+		  Next
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub ParseCode()
 		  Const kNone = 0
 		  Const kMethod = 1
 		  Const kProperty = 2
 		  Const kEvent = 3
-		  
-		  Dim includePrivate   As Boolean = (1 = Bitwise.BitAnd(App.kIncludePrivate, flags))
-		  Dim includeProtected As Boolean = (1 = Bitwise.BitAnd(App.kIncludeProtected, flags))
-		  Dim includeEvents    As Boolean = (1 = Bitwise.BitAnd(App.kIncludeEvents, flags))
 		  
 		  Dim tis As TextInputStream = TextInputStream.Open(File)
 		  
@@ -182,17 +203,7 @@ Protected Class XdocFile
 		    End If
 		  Wend
 		  
-		  For i As Integer = 0 To Notes.Ubound
-		    Dim o As XdocNote = Notes(i)
-		    
-		    If o.Name = "Overview" Then
-		      OverviewNote = o
-		      Notes.Remove i
-		      
-		      Exit For i
-		    End If
-		  Next
-		  
+		  tis.Close
 		End Sub
 	#tag EndMethod
 
@@ -394,6 +405,223 @@ Protected Class XdocFile
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub ParseXml()
+		  Dim xml As New XmlDocument(File)
+		  Dim root As XmlNode = xml.Child(0).Child(0) // <block>...</block>
+		  
+		  Dim kv As Dictionary
+		  
+		  For i As Integer = 0 To root.ChildCount - 1
+		    Dim n As XmlNode = root.Child(i)
+		    
+		    Select Case n.Name
+		    Case "IsClass"
+		      IsClass = (n.TextNodeValue = "1")
+		      
+		    Case "Method", "HookInstance"
+		      kv = xParseItem(n, False)
+		      
+		      Dim o As New XdocMethod
+		      o.Tag = New XdocTag
+		      o.Tag.Description = kv.Lookup("CodeDescription", "")
+		      o.Name = kv.Lookup("ItemName", "")
+		      o.IsShared = (kv.Lookup("IsShared", "0") = "1")
+		      o.Notes = kv.Lookup("__note", "")
+		      o.Parameters = kv.Lookup("ItemParams", "").StringValue.Split(", ")
+		      o.ReturnType = kv.Lookup("ItemResult", "")
+		      o.Type = kv.Lookup("__type", 0)
+		      o.Visibility = kv.Lookup("__visibility", xDocProject.kVisibilityNone)
+		      
+		      If n.Name = "Method" Then
+		        If o.IsShared Then
+		          SharedMethods.Append o
+		        Else
+		          Methods.Append o
+		        End If
+		        
+		      Else
+		        Events.Append o
+		      End If
+		      
+		    Case "Constant"
+		      kv = xParseItem(n, False)
+		      
+		      Dim o As New XdocConstant
+		      o.Tag = New XdocTag
+		      o.Tag.Description = kv.Lookup("CodeDescription", "")
+		      o.Description = o.Tag.Description
+		      o.Name = kv.Lookup("ItemName", "")
+		      o.Value = kv.Lookup("ItemDef", "")
+		      o.Visibility = kv.Lookup("__visibility", xDocProject.kVisibilityNone)
+		      
+		      Select Case kv.Lookup("ItemType", "0")
+		      Case "0"
+		        o.Type = "String"
+		      Case "1"
+		        o.Type = "Number"
+		      Case "2"
+		        o.Type = "Color"
+		      Case "3"
+		        o.Type = "Boolean"
+		      End Select
+		      
+		      Constants.Append o
+		      
+		    Case "Property"
+		      kv = xParseItem(n, True, True)
+		      
+		      Dim o As New XdocProperty
+		      o.Tag = New XdocTag
+		      o.Tag.Description = kv.Lookup("CodeDescription", "")
+		      o.Declaration = kv.Lookup("ItemDeclaration", "")
+		      o.IsShared = (kv.Lookup("IsShared", "0") = "1")
+		      o.Name = kv.Lookup("ItemName", "")
+		      o.Note = kv.Lookup("__note", "")
+		      
+		      If o.IsShared Then
+		        SharedProperties.Append o
+		      Else
+		        Properties.Append o
+		      End If
+		      
+		    Case "Note"
+		      kv = xParseItem(n, True)
+		      
+		      Dim o As New XdocNote
+		      o.Tag = New XdocTag
+		      o.Name = kv.Lookup("ItemName", "")
+		      o.Text = kv.Lookup("__note", "")
+		      
+		      Notes.Append o
+		      
+		    Case "Enumeration"
+		      kv = xParseItem(n, True)
+		      
+		      Dim o As New XdocEnum
+		      o.Tag = New XdocTag
+		      o.Tag.Description = kv.Lookup("CodeDescription", "")
+		      o.Name = kv.Lookup("ItemName", "")
+		      o.Values = kv.Lookup("__note", "").StringValue.Split(EndOfLine)
+		      o.Visibility = kv.Lookup("__visibility", XdocProject.kVisibilityNone)
+		      
+		      Enums.Append o
+		      
+		    Case "Hook"
+		      kv = xParseItem(n)
+		      
+		      Dim o As New XdocMethod
+		      o.Tag = New XdocTag
+		      o.Tag.Description = kv.Lookup("CodeDescription", "")
+		      o.Name = kv.Lookup("ItemName", "")
+		      o.Notes = kv.Lookup("__note", "")
+		      o.Parameters = kv.Lookup("ItemParams", "").StringValue.Split(", ")
+		      o.ReturnType = kv.Lookup("ItemResult", "")
+		      o.Visibility = kv.Lookup("__visibility", xDocProject.kVisibilityNone)
+		      
+		      EventDefinitions.Append o
+		      
+		    End Select
+		  Next
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function xParseItem(parent As XmlNode, sourceAsNote As Boolean = False, ignoreFirstSourceLine As Boolean = False) As Dictionary
+		  Dim result As New Dictionary
+		  
+		  For i As Integer = 0 To parent.ChildCount - 1
+		    Dim child As XmlNode = parent.Child(i)
+		    
+		    If child.FirstChild Is Nil Then
+		      result.Value(child.Name) = Nil
+		      
+		    ElseIf child.Name = "Flags" Then
+		      Dim vis As Integer = XdocProject.kVisibilityNone
+		      
+		      result.Value(child.Name) = child.TextNodeValue
+		      
+		      Select Case child.TextNodeValue
+		      Case "0"
+		        vis = If(IsClass, XdocProject.kVisibilityPublic, XdocProject.kVisibilityGlobal)
+		        
+		      Case "1"
+		        vis = XdocProject.kVisibilityProtected
+		        
+		      Case "33"
+		        vis = XdocProject.kVisibilityPrivate
+		      End Select
+		      
+		      result.Value("__visibility") = vis
+		      
+		    ElseIf child.FirstChild.Type = XmlNodeType.TEXT_NODE Then
+		      result.Value(child.Name) = child.TextNodeValue
+		      
+		    ElseIf child.Name = "ItemSource" Then
+		      result.Value(child.Name) = child
+		      
+		      Dim lines() As String
+		      Dim stripLeading As Integer = -1
+		      Dim sourceCount As Integer
+		      
+		      For j As Integer = 0 To child.ChildCount - 1
+		        Dim source As XmlNode = child.Child(j)
+		        
+		        If source.Name.Right(4) = "Line" Then
+		          sourceCount = sourceCount + 1
+		          
+		          If sourceAsNote Then
+		            If ignoreFirstSourceLine = False Or sourceCount > 1 Then
+		              lines.Append source.TextNodeValue
+		            End If
+		          Else
+		            Dim line As String
+		            
+		            
+		            If Not (source.FirstChild Is Nil) Then
+		              line = source.TextNodeValue
+		              
+		              If line.Left(1) = "'" Then
+		                line = line.Mid(2)
+		              ElseIf line.Left(2) = "//" Then
+		                line = line.Mid(3)
+		              ElseIf sourceCount > 1 Then
+		                Exit For j
+		              Else
+		                If line.InStr("Sub") = 1 Then
+		                  result.Value("__type") = XdocMethod.kSub
+		                ElseIf line.InStr("Function") = 1 Then
+		                  result.Value("__type") = XdocMethod.kFunction
+		                Else
+		                  result.Value("__type") = 0
+		                End If
+		                
+		                Continue For j
+		              End If
+		              
+		              If stripLeading = -1 And sourceCount > 1 Then
+		                For k As Integer = 1 To line.Len
+		                  If line.Mid(k, 1) <> " " Then
+		                    stripLeading = k
+		                    Exit For k
+		                  End If
+		                Next
+		              End If
+		              
+		              lines.Append line.Mid(stripLeading)
+		            End If
+		          End If
+		        End If
+		      Next
+		      
+		      result.Value("__note") = Join(lines, EndOfLine)
+		    End If
+		  Next
+		  
+		  Return result
+		End Function
+	#tag EndMethod
+
 
 	#tag Property, Flags = &h0
 		Constants() As XdocConstant
@@ -421,6 +649,22 @@ Protected Class XdocFile
 
 	#tag Property, Flags = &h0
 		Id As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private IncludeEvents As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private IncludePrivate As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private IncludeProtected As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private IsClass As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
