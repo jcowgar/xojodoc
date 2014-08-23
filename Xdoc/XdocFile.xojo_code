@@ -419,11 +419,12 @@ Protected Class XdocFile
 		    Case "IsClass"
 		      IsClass = (n.TextNodeValue = "1")
 		      
-		    Case "Method"
+		    Case "Method", "HookInstance"
 		      kv = xParseItem(n, False)
 		      
 		      Dim o As New XdocMethod
 		      o.Tag = New XdocTag
+		      o.Tag.Description = kv.Lookup("CodeDescription", "")
 		      o.Name = kv.Lookup("ItemName", "")
 		      o.IsShared = (kv.Lookup("IsShared", "0") = "1")
 		      o.Notes = kv.Lookup("__note", "")
@@ -432,14 +433,15 @@ Protected Class XdocFile
 		      o.Type = kv.Lookup("__type", 0)
 		      o.Visibility = kv.Lookup("__visibility", xDocProject.kVisibilityNone)
 		      
-		      If o.Name = "Append" Then
-		        Break
-		      End If
-		      
-		      If o.IsShared Then
-		        SharedMethods.Append o
+		      If n.Name = "Method" Then
+		        If o.IsShared Then
+		          SharedMethods.Append o
+		        Else
+		          Methods.Append o
+		        End If
+		        
 		      Else
-		        Methods.Append o
+		        Events.Append o
 		      End If
 		      
 		    Case "Constant"
@@ -447,7 +449,8 @@ Protected Class XdocFile
 		      
 		      Dim o As New XdocConstant
 		      o.Tag = New XdocTag
-		      o.Description = kv.Lookup("Description", "")
+		      o.Tag.Description = kv.Lookup("CodeDescription", "")
+		      o.Description = o.Tag.Description
 		      o.Name = kv.Lookup("ItemName", "")
 		      o.Value = kv.Lookup("ItemDef", "")
 		      o.Visibility = kv.Lookup("__visibility", xDocProject.kVisibilityNone)
@@ -470,6 +473,7 @@ Protected Class XdocFile
 		      
 		      Dim o As New XdocProperty
 		      o.Tag = New XdocTag
+		      o.Tag.Description = kv.Lookup("CodeDescription", "")
 		      o.Declaration = kv.Lookup("ItemDeclaration", "")
 		      o.IsShared = (kv.Lookup("IsShared", "0") = "1")
 		      o.Name = kv.Lookup("ItemName", "")
@@ -496,11 +500,27 @@ Protected Class XdocFile
 		      
 		      Dim o As New XdocEnum
 		      o.Tag = New XdocTag
+		      o.Tag.Description = kv.Lookup("CodeDescription", "")
 		      o.Name = kv.Lookup("ItemName", "")
 		      o.Values = kv.Lookup("__note", "").StringValue.Split(EndOfLine)
 		      o.Visibility = kv.Lookup("__visibility", XdocProject.kVisibilityNone)
 		      
 		      Enums.Append o
+		      
+		    Case "Hook"
+		      kv = xParseItem(n)
+		      
+		      Dim o As New XdocMethod
+		      o.Tag = New XdocTag
+		      o.Tag.Description = kv.Lookup("CodeDescription", "")
+		      o.Name = kv.Lookup("ItemName", "")
+		      o.Notes = kv.Lookup("__note", "")
+		      o.Parameters = kv.Lookup("ItemParams", "").StringValue.Split(", ")
+		      o.ReturnType = kv.Lookup("ItemResult", "")
+		      o.Visibility = kv.Lookup("__visibility", xDocProject.kVisibilityNone)
+		      
+		      EventDefinitions.Append o
+		      
 		    End Select
 		  Next
 		End Sub
