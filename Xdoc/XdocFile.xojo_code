@@ -459,7 +459,7 @@ Protected Class XdocFile
 		      End If
 		      
 		    Case "Note"
-		      kv = xParseItem(n, True)
+		      kv = xParseItem(n, True, True)
 		      
 		      Dim o As New XdocNote
 		      o.Tag = New XdocTag
