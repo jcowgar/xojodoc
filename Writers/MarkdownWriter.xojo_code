@@ -40,12 +40,12 @@ Inherits BaseWriter
 		    Return
 		  End If
 		  
-		  Tos.WriteLine "## Constants {#" + IdString(f.FullName, "Constants") + "}"
+		  Tos.WriteLine "## Constants" + Xref(IdString(f.FullName, "Constants"))
 		  
 		  For i As Integer = 0 To f.Constants.Ubound
 		    Dim c As XdocConstant = f.Constants(i)
 		    
-		    Tos.WriteLine "### " + c.Name + " As " + c.Type + " = " + c.Value + " {#" + IdString(f.FullName, c.Name) + "}"
+		    Tos.WriteLine "### " + c.Name + " As " + c.Type + " = " + c.Value + Xref(IdString(f.FullName, c.Name))
 		    If c.Tag.Description <> "" Then
 		      Tos.WriteLine c.Tag.Description
 		    End If
@@ -58,11 +58,11 @@ Inherits BaseWriter
 
 	#tag Method, Flags = &h0
 		Sub WriteFile(xFile As XdocFile)
-		  Tos.WriteLine "# " + xFile.Type + " " +  xFile.FullName + " {#" + IdString(xFile.FullName) + "}"
+		  Tos.WriteLine "# " + xFile.Type + " " +  xFile.FullName + Xref(IdString(xFile.FullName))
 		  Tos.WriteLine ""
 		  
 		  If Not (xFile.OverviewNote Is Nil) Then
-		    Tos.WriteLine "## Overview {#" + IdString(xFile.FullName, "Overview") + "}"
+		    Tos.WriteLine "## Overview" + Xref(IdString(xFile.FullName, "Overview"))
 		    Tos.WriteLine xFile.OverviewNote.Text
 		    Tos.WriteLine ""
 		  End If
@@ -71,7 +71,7 @@ Inherits BaseWriter
 		  
 		  If notes.Ubound > -1 Then
 		    For i As Integer = 0 To notes.Ubound
-		      Tos.WriteLine "## " + notes(i).Name + " {#" + IdString(xFile.FullName, notes(i).Name) + "}"
+		      Tos.WriteLine "## " + notes(i).Name + Xref(IdString(xFile.FullName, notes(i).Name))
 		      Tos.WriteLine notes(i).Text
 		      Tos.WriteLine ""
 		    Next
@@ -80,44 +80,66 @@ Inherits BaseWriter
 		  WriteConstants(xFile)
 		  
 		  If xFile.Enums.Ubound > -1 Then
-		    Tos.WriteLine "## Enums  {#" + xFile.FullName + ".Enums}"
-		    Tos.WriteLine ""
+		    Dim hasRelatedNote As Boolean
 		    
-		    For i As Integer = 0 To xFile.Enums.Ubound
-		      Dim e As XdocEnum = xFile.Enums(i)
-		      
-		      Tos.WriteLine "### " + e.Name + " {#" + IdString(xFile.FullName, e.Name) + "}"
-		      If e.Tag.Description <> "" Then
-		        Tos.WriteLine e.Tag.Description
-		        Tos.WriteLine ""
+		    For Each n As XdocNote In xFile.Notes
+		      If n.Name = "Enums" Then
+		        hasRelatedNote = True
+		        Exit
 		      End If
-		      
-		      Tos.WriteLine "#### Values"
-		      For j As Integer = 0 To e.Values.Ubound
-		        Tos.WriteLine "* `" + e.Values(j) + "`"
-		      Next
-		      
-		      Tos.WriteLine ""
 		    Next
+		    
+		    If Not hasRelatedNote Then
+		      Tos.WriteLine "## Enums" + Xref(xFile.FullName + ".Enums")
+		      Tos.WriteLine ""
+		      
+		      For i As Integer = 0 To xFile.Enums.Ubound
+		        Dim e As XdocEnum = xFile.Enums(i)
+		        
+		        Tos.WriteLine "### " + e.Name + Xref(IdString(xFile.FullName, e.Name))
+		        If e.Tag.Description <> "" Then
+		          Tos.WriteLine e.Tag.Description
+		          Tos.WriteLine ""
+		        End If
+		        
+		        Tos.WriteLine "#### Values"
+		        For j As Integer = 0 To e.Values.Ubound
+		          Tos.WriteLine "* `" + e.Values(j) + "`"
+		        Next
+		        
+		        Tos.WriteLine ""
+		      Next
+		    End If
 		  End If
 		  
 		  If xFile.EventDefinitions.Ubound > -1 Then
-		    Tos.WriteLine "## Event Definitions {#" + IdString(xFile.FullName, "EventDefinitions") + "}"
-		    Tos.WriteLine ""
+		    Dim hasRelatedNote As Boolean
 		    
-		    For Each m As XdocMethod In xFile.EventDefinitions
-		      Dim line As String = m.Name + "(" + Join(m.Parameters, ", ") + ")"
-		      If m.ReturnType <> "" Then
-		        line = line + " As " + m.ReturnType
+		    For Each n As XdocNote In xFile.Notes
+		      If n.Name = "Event Definitions" Then
+		        hasRelatedNote = True
+		        Exit
 		      End If
-		      
-		      Tos.WriteLine "### " + line + " {#" + IdString(xFile.FullName, m.Name) + "}"
-		      If m.Tag.Description <> "" Then
-		        Tos.WriteLine m.Tag.Description
-		      End If
-		      
-		      Tos.WriteLine ""
 		    Next
+		    
+		    If Not hasRelatedNote Then
+		      Tos.WriteLine "## Event Definitions" + Xref(IdString(xFile.FullName, "EventDefinitions"))
+		      Tos.WriteLine ""
+		      
+		      For Each m As XdocMethod In xFile.EventDefinitions
+		        Dim line As String = m.Name + "(" + Join(m.Parameters, ", ") + ")"
+		        If m.ReturnType <> "" Then
+		          line = line + " As " + m.ReturnType
+		        End If
+		        
+		        Tos.WriteLine "### " + line + Xref(IdString(xFile.FullName, m.Name))
+		        If m.Tag.Description <> "" Then
+		          Tos.WriteLine m.Tag.Description
+		        End If
+		        
+		        Tos.WriteLine ""
+		      Next
+		    End If
 		  End If
 		  
 		  WriteMethods("Events", xFile, xFile.Events)
@@ -134,7 +156,7 @@ Inherits BaseWriter
 		    Return
 		  End If
 		  
-		  Tos.WriteLine "## " + sectionTitle + " {#" + IdString(f.FullName, sectionTitle) + "}"
+		  Tos.WriteLine "## " + sectionTitle + Xref(IdString(f.FullName, sectionTitle))
 		  Tos.WriteLine ""
 		  
 		  If meths.Ubound > -1 Then
@@ -146,7 +168,7 @@ Inherits BaseWriter
 		        methodLine = methodLine + " As " + m.ReturnType
 		      End If
 		      
-		      Tos.WriteLine "### " + methodLine + " {#" + IdString(f.FullName, m.Name) + "}"
+		      Tos.WriteLine "### " + methodLine + Xref(IdString(f.FullName, m.Name))
 		      If m.Tag.Description <> "" Then
 		        Tos.WriteLine m.Tag.Description
 		        Tos.WriteLine ""
@@ -176,14 +198,14 @@ Inherits BaseWriter
 		    Return
 		  End If
 		  
-		  Tos.WriteLine "## " + sectionTitle + " {#" + IdString(f.FullName, sectionTitle) + "}"
+		  Tos.WriteLine "## " + sectionTitle + Xref(IdString(f.FullName, sectionTitle))
 		  Tos.WriteLine ""
 		  
 		  If props.Ubound > -1 Then
 		    For i As Integer = 0 To props.Ubound
 		      Dim p As XdocProperty = props(i)
 		      
-		      Tos.WriteLine "### " + p.Declaration + " {#" + IdString(f.FullName, p.Name) + "}"
+		      Tos.WriteLine "### " + p.Declaration + Xref(IdString(f.FullName, p.Name))
 		      Tos.WriteLine ""
 		      
 		      If p.Tag.Description <> "" Then
@@ -201,9 +223,23 @@ Inherits BaseWriter
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function Xref(ref As String) As String
+		  If WriteXref Then
+		    Return "  {#" + ref + "}"
+		  Else
+		    Return ""
+		  End If
+		End Function
+	#tag EndMethod
+
 
 	#tag Property, Flags = &h21
 		Private Tos As TextOutputStream
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		WriteXref As Boolean
 	#tag EndProperty
 
 

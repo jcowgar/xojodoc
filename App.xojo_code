@@ -65,6 +65,7 @@ Inherits ConsoleApplication
 		  Select Case OutputFormat
 		  Case "markdown"
 		    writer = New MarkdownWriter
+		    MarkdownWriter(writer).WriteXref = NonStandardXref
 		    
 		  Case "asciidoc"
 		    writer = New AsciiDocWriter
@@ -183,6 +184,9 @@ Inherits ConsoleApplication
 		  o = New Option("i", "include", "Include items beginning with Full Name of")
 		  Options.AddOption o
 		  
+		  o = New Option("", "xref", "Write non-standard Markdown cross reference ids", option.OptionType.Boolean)
+		  Options.AddOption o
+		  
 		  Options.Parse(args)
 		  OutputFolder = Options.FileValue("output-directory")
 		  OutputFile = Options.FileValue("output-file")
@@ -219,6 +223,7 @@ Inherits ConsoleApplication
 		  ExcludePackages = Options.StringValue("exclude").Split(",")
 		  IncludePackages = Options.StringValue("include").Split(",")
 		  FlatOutput = Options.BooleanValue("flat")
+		  NonStandardXref = Options.BooleanValue("xref", False)
 		  
 		  If options.BooleanValue("include-private") Then
 		    Flags = Flags + kIncludePrivate
@@ -333,6 +338,10 @@ Inherits ConsoleApplication
 
 	#tag Property, Flags = &h21
 		Private IncludePackages() As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		NonStandardXref As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
