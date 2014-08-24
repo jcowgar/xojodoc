@@ -22,7 +22,7 @@ Inherits BaseWriter
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function IdString(ParamArray  values() As String) As String
+		Private Function IdString(ParamArray values() As String) As String
 		  Dim v() As String
 		  
 		  For i As Integer = 0 To values.Ubound
@@ -64,14 +64,11 @@ Inherits BaseWriter
 		    Return
 		  End If
 		  
-		  Dim hasRelatedNote As Boolean
-		  
 		  For Each n As XdocNote In CurrentFile.Notes
 		    If n.Name = "Constants" Then
 		      Return
 		    End If
 		  Next
-		  
 		  
 		  WriteAnchor "Constants"
 		  Tos.WriteLine "=== Constants"
