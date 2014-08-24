@@ -66,7 +66,7 @@ Protected Class XdocFile
 	#tag EndMethod
 
 	#tag Method, Flags = &h0, Description = 50617273652074686520636F6E74656E7473206F66207468652066696C6520706F70756C6174696E67206974732070726F70657274696573
-		Sub Parse(flags As Integer)
+		Sub Parse()
 		  // .Parameters
 		  // * `flags` - Bit flags regarding what to include or not, see +<<App.kIncludeEvents,App.kIncludeEvents>>+,
 		  //   +<<App.kIncludePrivate,App.kIncludePrivate>>+,
@@ -83,10 +83,6 @@ Protected Class XdocFile
 		  // .See Also:
 		  // +<<Xdoc.XdocConstant>>+, +<<Xdoc.XdocProperty>>+, +<<Xdoc.XdocMethod>>+ and +<<Xdoc.XdocNote>>+.
 		  //
-		  
-		  IncludePrivate = (1 = Bitwise.BitAnd(App.kIncludePrivate, flags))
-		  IncludeProtected = (1 = Bitwise.BitAnd(App.kIncludeProtected, flags))
-		  IncludeEvents = (1 = Bitwise.BitAnd(App.kIncludeEvents, flags))
 		  
 		  If File.Name.Right(13) = "xojo_xml_code" Then
 		    ParseXml
@@ -127,12 +123,6 @@ Protected Class XdocFile
 		        Dim o As XdocMethod = ParseMethod(tis)
 		        o.Tag = t
 		        
-		        If (o.Visibility = XdocProject.kVisibilityPrivate And Not includePrivate) Or _
-		          (o.Visibility = XdocProject.kVisibilityProtected And Not includeProtected) _
-		          Then
-		          Continue
-		        End If
-		        
 		        If o.IsShared Then
 		          SharedMethods.Append o
 		        Else
@@ -140,22 +130,14 @@ Protected Class XdocFile
 		        End If
 		        
 		      Case "Event"
-		        If includeEvents Then
-		          Dim e As XdocMethod = ParseMethod(tis)
-		          e.Tag = t
-		          
-		          Events.Append e
-		        End If
+		        Dim e As XdocMethod = ParseMethod(tis)
+		        e.Tag = t
+		        
+		        Events.Append e
 		        
 		      Case "ComputedProperty", "Property"
 		        Dim o As XdocProperty = ParseProperty(tis)
 		        o.Tag = t
-		        
-		        If (o.Visibility = XdocProject.kVisibilityPrivate And Not includePrivate) Or _
-		          (o.Visibility = XdocProject.kVisibilityProtected And Not includeProtected) _
-		          Then
-		          Continue
-		        End If
 		        
 		        If o.IsShared Then
 		          SharedProperties.Append o
@@ -180,23 +162,11 @@ Protected Class XdocFile
 		        o.Tag = t
 		        o.Visibility = o.Tag.Visibility
 		        
-		        If (o.Visibility = XdocProject.kVisibilityPrivate And Not includePrivate) Or _
-		          (o.Visibility = XdocProject.kVisibilityProtected And Not includeProtected) _
-		          Then
-		          Continue
-		        End If
-		        
 		        Enums.Append o
 		        
 		      Case "Constant"
 		        Dim o As XdocConstant = ParseConstant(tis, t)
 		        o.Tag = t
-		        
-		        If (o.Visibility = XdocProject.kVisibilityPrivate And Not includePrivate) Or _
-		          (o.Visibility = XdocProject.kVisibilityProtected And Not includeProtected) _
-		          Then
-		          Continue
-		        End If
 		        
 		        Constants.Append o
 		      End Select
@@ -426,6 +396,7 @@ Protected Class XdocFile
 		      o.Tag = New XdocTag
 		      o.Tag.Description = kv.Lookup("CodeDescription", "")
 		      o.Name = kv.Lookup("ItemName", "")
+		      
 		      o.IsShared = (kv.Lookup("IsShared", "0") = "1")
 		      o.Notes = kv.Lookup("__note", "")
 		      o.Parameters = kv.Lookup("ItemParams", "").StringValue.Split(", ")
@@ -458,6 +429,7 @@ Protected Class XdocFile
 		      Select Case kv.Lookup("ItemType", "0")
 		      Case "0"
 		        o.Type = "String"
+		        o.Value = """" + o.Value + """"
 		      Case "1"
 		        o.Type = "Number"
 		      Case "2"
@@ -478,6 +450,7 @@ Protected Class XdocFile
 		      o.IsShared = (kv.Lookup("IsShared", "0") = "1")
 		      o.Name = kv.Lookup("ItemName", "")
 		      o.Note = kv.Lookup("__note", "")
+		      o.Visibility = kv.Lookup("__visibility", xDocProject.kVisibilityNone)
 		      
 		      If o.IsShared Then
 		        SharedProperties.Append o
@@ -536,7 +509,7 @@ Protected Class XdocFile
 		    If child.FirstChild Is Nil Then
 		      result.Value(child.Name) = Nil
 		      
-		    ElseIf child.Name = "Flags" Then
+		    ElseIf child.Name = "Flags" Or child.Name = "ItemFlags" Then
 		      Dim vis As Integer = XdocProject.kVisibilityNone
 		      
 		      result.Value(child.Name) = child.TextNodeValue
@@ -649,18 +622,6 @@ Protected Class XdocFile
 
 	#tag Property, Flags = &h0
 		Id As String
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private IncludeEvents As Boolean
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private IncludePrivate As Boolean
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private IncludeProtected As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h21

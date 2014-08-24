@@ -31,7 +31,7 @@ Inherits ConsoleApplication
 		  For fIdx As Integer = 0 To Project.Files.Ubound
 		    Dim file As XdocFile = Project.Files(fIdx)
 		    Print "Processing: " + file.File.Name
-		    file.Parse(Flags)
+		    file.Parse
 		    
 		    If Not (OutputFile Is Nil) And file.Name = "App" Then
 		      // Look for a "Project Overview" Note
@@ -47,6 +47,39 @@ Inherits ConsoleApplication
 		        End If
 		      Next
 		    End If
+		    
+		    //
+		    // Get rid of any items that we are not going to output
+		    //
+		    
+		    file.Methods = StripMethods(file.Methods)
+		    file.SharedMethods = StripMethods(file.SharedMethods)
+		    file.Events = StripMethods(file.Events)
+		    file.EventDefinitions = StripMethods(file.EventDefinitions)
+		    
+		    For i As Integer = file.Constants.Ubound DownTo 0
+		      If Not ShouldPrint(file.Constants(i).Visibility) Then
+		        file.Constants.Remove i
+		      End If
+		    Next
+		    
+		    For i As integer = file.Enums.Ubound DownTo 0
+		      If Not ShouldPrint(file.Enums(i).Visibility) Then
+		        file.Enums.Remove i
+		      End If
+		    Next
+		    
+		    For i As integer = file.Properties.Ubound DownTo 0
+		      If Not ShouldPrint(file.Properties(i).Visibility) Then
+		        file.Properties.Remove i
+		      End If
+		    Next
+		    
+		    For i As integer = file.SharedProperties.Ubound DownTo 0
+		      If Not ShouldPrint(file.SharedProperties(i).Visibility) Then
+		        file.SharedProperties.Remove i
+		      End If
+		    Next
 		  Next
 		  
 		  Dim fh As FolderItem
@@ -224,22 +257,35 @@ Inherits ConsoleApplication
 		  IncludePackages = Options.StringValue("include").Split(",")
 		  FlatOutput = Options.BooleanValue("flat")
 		  NonStandardXref = Options.BooleanValue("xref", False)
-		  
-		  If options.BooleanValue("include-private") Then
-		    Flags = Flags + kIncludePrivate
-		  End If
-		  
-		  If options.BooleanValue("include-protected") Then
-		    Flags = Flags + kIncludeProtected
-		  End If
-		  
-		  If options.BooleanValue("include-events") Then
-		    Flags = Flags + kIncludeEvents
-		  End If
-		  
+		  IncludePrivate = options.BooleanValue("include-private")
+		  IncludeProtected = options.BooleanValue("include-protected")
+		  IncludeEvents = options.BooleanValue("include-events")
 		  OutputFormat = options.StringValue("output-format", "asciidoc")
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function ShouldPrint(vis As Integer) As Boolean
+		  Return _
+		  (vis = XdocProject.kVisibilityGlobal) Or _
+		  (vis = XdocProject.kVisibilityPublic) Or _
+		  (vis = XdocProject.kVisibilityProtected And IncludeProtected) Or _
+		  (vis = XdocProject.kVisibilityPrivate And IncludePrivate)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function StripMethods(m() As XdocMethod) As XdocMethod()
+		  For i As Integer = m.Ubound DownTo 0
+		    If Not ShouldPrint(m(i).Visibility) Then
+		      m.Remove i
+		    End If
+		  Next
+		  
+		  Return m
+		End Function
 	#tag EndMethod
 
 
@@ -337,7 +383,19 @@ Inherits ConsoleApplication
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
+		Private IncludeEvents As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
 		Private IncludePackages() As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private IncludePrivate As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private IncludeProtected As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
