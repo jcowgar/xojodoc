@@ -39,7 +39,7 @@ Protected Class XdocFile
 		  
 		  If rx Is Nil Then
 		    rx = New RegEx
-		    rx.SearchPattern = "(?mi-Us)^((Private|Protected|Public|Global)\s)?((Shared)\s)?([a-z0-9_\-\(\),]+)\sAs\s(.*)$"
+		    rx.SearchPattern = "(?mi-Us)^(?:Attributes\(.*\)\s+)?((Private|Protected|Public|Global)\s)?((Shared)\s)?([a-z0-9_\-\(\),]+)\sAs\s(.*)$"
 		    
 		    dim rxOptions As RegExOptions = rx.Options
 		    rxOptions.LineEndType = 4
