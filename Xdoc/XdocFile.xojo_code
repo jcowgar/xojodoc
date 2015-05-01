@@ -244,7 +244,7 @@ Protected Class XdocFile
 		      
 		    Else
 		      // We are no longer in a comment
-		      Exit
+		      Exit While
 		    End If
 		    
 		    notes.Append line
@@ -550,8 +550,9 @@ Protected Class XdocFile
 		          Else
 		            Dim line As String
 		            
-		            
-		            If Not (source.FirstChild Is Nil) Then
+		            If source.FirstChild Is Nil Then
+		              Exit For j
+		            Else
 		              line = source.TextNodeValue
 		              
 		              If line.Left(1) = "'" Then
