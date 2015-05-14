@@ -5,8 +5,16 @@ Inherits ConsoleApplication
 		Function Run(args() as String) As Integer
 		  ParseOptions(args)
 		  
+		  //
+		  // Read the project
+		  //
+		  
 		  Project = New XdocProject(ProjectFile)
 		  Project.ReadManifest
+		  
+		  //
+		  // Remove items that the user does not want to process
+		  //
 		  
 		  For fIdx As Integer = Project.Files.Ubound DownTo 0
 		    Dim file As XdocFile = Project.Files(fIdx)
@@ -27,6 +35,10 @@ Inherits ConsoleApplication
 		      End If
 		    Next
 		  Next
+		  
+		  //
+		  // Process each file in the project manifest
+		  //
 		  
 		  For fIdx As Integer = 0 To Project.Files.Ubound
 		    Dim file As XdocFile = Project.Files(fIdx)
@@ -82,6 +94,10 @@ Inherits ConsoleApplication
 		    Next
 		  Next
 		  
+		  //
+		  // Begin file output
+		  //
+		  
 		  Dim fh As FolderItem
 		  Dim asSingle As Boolean
 		  
@@ -118,6 +134,10 @@ Inherits ConsoleApplication
 		      writer.WriteProjectOverview(Project.ProjectNote)
 		    End If
 		  End If
+		  
+		  //
+		  // Loop through parsed files outputing data
+		  //
 		  
 		  Dim files() As XdocFile = Project.Files
 		  Dim fileNames() As String
