@@ -171,6 +171,69 @@ Inherits ConsoleApplication
 		  If asSingle Then
 		    writer.EndCurrentFile
 		  End If
+		  
+		  //
+		  // Finish up by warning about any undocumented item
+		  //
+		  
+		  if WarnOnUndocumented then
+		    for fileIdx as Integer = 0 to files.Ubound
+		      dim f As XdocFile = files(fileIdx)
+		      
+		      if f.OverviewNote is nil then
+		        Warn(f, "File is missing an overview note")
+		      end if
+		      
+		      for idx as Integer = 0 to f.Constants.Ubound
+		        dim o as XdocConstant = f.Constants(idx)
+		        if o.Description = "" then
+		          Warn(f, o, "Constant is missing documentation")
+		        end if
+		      next
+		      
+		      for idx as Integer = 0 to f.EventDefinitions.Ubound
+		        dim o as XdocMethod = f.EventDefinitions(idx)
+		        if o.Notes = "" then
+		          Warn(f, o, "Event Definition is missing documentation")
+		        end if
+		      next
+		      
+		      for idx as Integer = 0 to f.Events.Ubound
+		        dim o as XdocMethod = f.Events(idx)
+		        if o.Notes = "" then
+		          Warn(f, o, "Event is missing documentation")
+		        end if
+		      next
+		      
+		      for idx as Integer = 0 to f.Methods.Ubound
+		        dim o as XdocMethod = f.Methods(idx)
+		        if o.Notes = "" then
+		          Warn(f, o, "Method is missing documentation")
+		        end if
+		      next
+		      
+		      for idx as Integer = 0 to f.SharedMethods.Ubound
+		        dim o as XdocMethod = f.SharedMethods(idx)
+		        if o.Notes = "" then
+		          Warn(f, o, "Shared Method is missing documentation")
+		        end if
+		      next
+		      
+		      for idx as Integer = 0 to f.Properties.Ubound
+		        dim o as XdocProperty = f.Properties(idx)
+		        if o.Note = "" then
+		          Warn(f, o, "Property is missing documentation")
+		        end if
+		      next
+		      
+		      for idx as Integer = 0 to f.SharedProperties.Ubound
+		        dim o as XdocProperty = f.SharedProperties(idx)
+		        if o.Note = "" then
+		          Warn(f, o, "Shared Property is missing documentation")
+		        end if
+		      next
+		    next
+		  end if
 		End Function
 	#tag EndEvent
 
@@ -237,7 +300,10 @@ Inherits ConsoleApplication
 		  o = New Option("i", "include", "Include items beginning with Full Name of")
 		  Options.AddOption o
 		  
-		  o = New Option("", "xref", "Write non-standard Markdown cross reference ids", option.OptionType.Boolean)
+		  o = New Option("", "xref", "Write non-standard Markdown cross reference ids", Option.OptionType.Boolean)
+		  Options.AddOption o
+		  
+		  o = new Option("", "warn", "Warn about items not documented", Option.OptionType.Boolean)
 		  Options.AddOption o
 		  
 		  Options.Parse(args)
@@ -281,7 +347,7 @@ Inherits ConsoleApplication
 		  IncludeProtected = options.BooleanValue("include-protected")
 		  IncludeEvents = options.BooleanValue("include-events")
 		  OutputFormat = options.StringValue("output-format", "asciidoc")
-		  
+		  WarnOnUndocumented = options.BooleanValue("warn", False)
 		End Sub
 	#tag EndMethod
 
@@ -306,6 +372,36 @@ Inherits ConsoleApplication
 		  
 		  Return m
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub Warn(f as XdocFile, message as String)
+		  Print "Warning: " + f.Name + ": " + message
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub Warn(f as XdocFile, o as XdocConstant, message as String)
+		  Print "Warning: " + f.Name + "." + o.Name + ": " + message
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub Warn(f as XdocFile, o as XdocEnum, message as String)
+		  Print "Warning: " + f.Name + "." + o.Name + ": " + message
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub Warn(f as XdocFile, o as XdocMethod, message as String)
+		  Print "Warning: " + f.Name + "." + o.Name + ": " + message
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub Warn(f as XdocFile, o as XdocProperty, message as String)
+		  Print "Warning: " + f.Name + "." + o.Name + ": " + message
+		End Sub
 	#tag EndMethod
 
 
@@ -446,6 +542,10 @@ Inherits ConsoleApplication
 		Private ProjectFile As FolderItem
 	#tag EndProperty
 
+	#tag Property, Flags = &h21
+		Private WarnOnUndocumented As Boolean
+	#tag EndProperty
+
 
 	#tag Constant, Name = BuildDateString, Type = String, Dynamic = False, Default = \"unknown", Scope = Public
 	#tag EndConstant
@@ -470,6 +570,11 @@ Inherits ConsoleApplication
 
 
 	#tag ViewBehavior
+		#tag ViewProperty
+			Name="NonStandardXref"
+			Group="Behavior"
+			Type="Boolean"
+		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
 #tag EndClass
